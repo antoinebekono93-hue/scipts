@@ -14,7 +14,7 @@ export async function getAllDataByType(dataType = 'categories') {
           title: 'Partagez vos créations avec le monde entier',
           subtitle: 'LA NOUVELLE ÉCONOMIE CRÉATIVE',
           description: "Collectionnez et vendez des œuvres d'art numériques grâce aux meilleurs outils en ligne.",
-          image: { imgix_url: '/images/content/figures.png' }
+          image: { imgix_url: '/images/content/hero.png' }
         }
       },
       {
@@ -56,7 +56,7 @@ export async function getAllDataByType(dataType = 'categories') {
         {
           id: 'mock-nav',
           metadata: {
-            logo: { imgix_url: '/cosmic.svg' },
+            logo: { imgix_url: '/logo.png' },
             menu: [
               { title: 'Découvrir', url: '/search' },
               { title: 'Créer un élément', url: '/upload-details' },
