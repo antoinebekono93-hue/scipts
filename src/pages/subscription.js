@@ -14,12 +14,13 @@ const Subscription = ({ navigationItems }) => {
   const { cosmicUser } = useStateContext()
   const { push } = useRouter()
   const [loading, setLoading] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState(null)
 
-  // Configuration Flutterwave
+  // Configuration de base pour Flutterwave
   const config = {
-    public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || 'FLWPUBK_TEST-SANDBOXDEMOKEY-X', // Remplacez par votre vraie clé publique
+    public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || 'FLWPUBK_TEST-SANDBOXDEMOKEY-X',
     tx_ref: Date.now().toString(),
-    amount: 15,
+    amount: selectedPlan?.price || 15,
     currency: 'USD',
     payment_options: 'card,mobilemoney,ussd',
     customer: {
@@ -27,90 +28,132 @@ const Subscription = ({ navigationItems }) => {
       name: cosmicUser?.displayName || cosmicUser?.display_name || 'Utilisateur',
     },
     customizations: {
-      title: 'Abonnement Premium (1 An)',
-      description: 'Accès illimité aux scripts et templates premium',
+      title: `Abonnement ${selectedPlan?.name}`,
+      description: 'Accès illimité aux scripts premium',
       logo: 'https://scipts.vercel.app/logo.png',
     },
     meta: {
-      user_id: cosmicUser?.id
+      user_id: cosmicUser?.id,
+      plan_type: selectedPlan?.type
     }
   }
 
   const handleFlutterPayment = useFlutterwave(config)
 
-  const handlePayment = () => {
+  const handlePayment = (plan) => {
     if (!cosmicUser?.hasOwnProperty('id')) {
       toast.error('Veuillez vous connecter pour vous abonner.')
       return
     }
 
-    setLoading(true)
-    handleFlutterPayment({
-      callback: async (response) => {
-         // Ce callback est appelé dès que le popup Flutterwave se ferme après succès
-         if (response.status === "successful") {
-            toast.success("Paiement réussi ! Activation de votre abonnement...")
-            
-            // On peut appeler une API ici pour vérifier la transaction
-            try {
-              const res = await fetch('/api/webhook/flutterwave', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ transaction_id: response.transaction_id, user_id: cosmicUser.id })
-              })
-              
-              if (res.ok) {
-                toast.success("Abonnement activé avec succès !")
-                push('/search') // Rediriger vers la liste des scripts
-              } else {
-                toast.error("Erreur lors de l'activation. Contactez le support.")
+    if (plan.price === 0) {
+      push('/search') // Redirige vers le catalogue pour le plan gratuit
+      return
+    }
+
+    setSelectedPlan(plan)
+    
+    // Le setState est asynchrone, donc on utilise un setTimeout léger pour s'assurer que config est à jour
+    setTimeout(() => {
+      setLoading(true)
+      handleFlutterPayment({
+        callback: async (response) => {
+           if (response.status === "successful") {
+              toast.success("Paiement réussi ! Activation en cours...")
+              try {
+                const res = await fetch('/api/webhook/flutterwave', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    transaction_id: response.transaction_id, 
+                    user_id: cosmicUser.id,
+                    amount: plan.price
+                  })
+                })
+                
+                if (res.ok) {
+                  toast.success("Abonnement activé avec succès !")
+                  push('/search')
+                } else {
+                  toast.error("Erreur lors de l'activation.")
+                }
+              } catch (err) {
+                console.error(err)
               }
-            } catch (err) {
-              console.error(err)
-            }
-         }
-         closePaymentModal()
-         setLoading(false)
-      },
-      onClose: () => {
-        setLoading(false)
-      },
-    })
+           }
+           closePaymentModal()
+           setLoading(false)
+        },
+        onClose: () => {
+          setLoading(false)
+        },
+      })
+    }, 100)
   }
+
+  const plans = [
+    {
+      name: 'Gratuit',
+      type: 'free',
+      price: 0,
+      period: 'Illimité',
+      features: ['Téléchargements gratuits illimités', 'Mises à jour standards', 'Support communautaire'],
+      btnText: 'Explorer',
+    },
+    {
+      name: 'Mensuel',
+      type: 'monthly',
+      price: 15,
+      period: 'Facturé par mois',
+      features: ['Téléchargements Premium illimités', 'Scripts & Plugins Pro', 'Mises à jour gratuites pendant 1 mois', 'Support prioritaire'],
+      btnText: 'Souscrire',
+      popular: false
+    },
+    {
+      name: 'Annuel',
+      type: 'annual',
+      price: 99,
+      period: 'Facturé par an',
+      features: ['Téléchargements Premium illimités', 'Scripts & Plugins Pro', 'Mises à jour gratuites pendant 1 an', 'Économisez 45%'],
+      btnText: 'Souscrire (99$)',
+      popular: true
+    }
+  ]
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <PageMeta
-        title={'Abonnement Premium | Marketplace'}
-        description={'Débloquez tous les scripts PHP, applications mobiles et templates avec notre abonnement annuel.'}
+        title={'Nos Abonnements | Script Marketplace'}
+        description={'Débloquez tous les scripts PHP, applications et templates.'}
       />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>
-          <div className={styles.wrapper}>
-            <h1 className={cn('h2', styles.title)}>Passez au niveau supérieur</h1>
-            <div className={styles.subtitle}>
-              Débloquez des centaines de scripts PHP, templates HTML et applications mobiles de qualité professionnelle.
-            </div>
-            
-            <div className={styles.priceBox}>
-              <div className={styles.price}>$15</div>
-              <div className={styles.period}>Facturé annuellement</div>
-            </div>
-
-            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '40px', fontSize: '18px', textAlign: 'left', display: 'inline-block' }}>
-              <li style={{ marginBottom: '16px' }}>✅ Accès illimité aux produits Premium</li>
-              <li style={{ marginBottom: '16px' }}>✅ Mises à jour gratuites pendant 1 an</li>
-              <li style={{ marginBottom: '16px' }}>✅ Support communautaire</li>
-              <li>✅ Paiement Mobile Money & Carte Bancaire</li>
-            </ul>
-
-            <button
-              className={cn('button', styles.button)}
-              onClick={handlePayment}
-              disabled={loading}
-            >
-              {loading ? 'Chargement...' : 'Souscrire maintenant'}
-            </button>
+          <h1 className={styles.title}>Choisissez votre abonnement</h1>
+          <div className={styles.subtitle}>
+            Des milliers de scripts et templates de qualité professionnelle à portée de clic.
+          </div>
+          
+          <div className={styles.grid}>
+            {plans.map((plan, index) => (
+              <div key={index} className={cn(styles.card, { [styles.popular]: plan.popular })}>
+                {plan.popular && <div className={styles.popularTag}>Le plus populaire</div>}
+                <div className={styles.planName}>{plan.name}</div>
+                <div className={styles.price}>${plan.price}</div>
+                <div className={styles.period}>{plan.period}</div>
+                <ul className={styles.features}>
+                  {plan.features.map((feat, i) => (
+                    <li key={i}>✅ {feat}</li>
+                  ))}
+                </ul>
+                <button
+                  className={cn('button', styles.button)}
+                  onClick={() => handlePayment(plan)}
+                  disabled={loading}
+                >
+                  {loading && selectedPlan?.type === plan.type ? '...' : plan.btnText}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -11,38 +11,49 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method Not Allowed' })
   }
 
-  const { transaction_id, user_id } = req.body
+  const { transaction_id, user_id, amount } = req.body
 
   if (!transaction_id || !user_id) {
     return res.status(400).json({ message: 'Missing transaction_id or user_id' })
   }
 
   try {
-    // 1. Vérifier la transaction auprès de Flutterwave (Optionnel mais recommandé en prod)
-    // const flwRes = await fetch(`https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`, {
-    //   headers: { Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}` }
-    // })
-    // const flwData = await flwRes.json()
-    // if (flwData.data.status !== "successful" || flwData.data.amount < 15) throw new Error("Invalid transaction")
+    // 1. Calcul de la durée en fonction du montant payé
+    const endDate = new Date()
+    let plan = 'free'
+    if (amount >= 99) {
+      endDate.setFullYear(endDate.getFullYear() + 1) // + 1 an
+      plan = 'annual'
+    } else if (amount >= 15) {
+      endDate.setMonth(endDate.getMonth() + 1) // + 1 mois
+      plan = 'monthly'
+    }
 
     // 2. Mettre à jour l'abonnement de l'utilisateur dans Nhost Hasura
-    const endDate = new Date()
-    endDate.setFullYear(endDate.getFullYear() + 1) // + 1 an
-
     const { data, error } = await nhost.graphql.request(`
-      mutation UpdateSubscription($user_id: uuid!, $end_date: timestamptz!) {
+      mutation UpdateSubscription($user_id: uuid!, $end_date: timestamptz!, $plan: String!) {
         insert_user_profiles_one(
-          object: { id: $user_id, has_active_subscription: true, subscription_end_date: $end_date },
-          on_conflict: { constraint: user_profiles_pkey, update_columns: [has_active_subscription, subscription_end_date] }
+          object: { 
+            id: $user_id, 
+            has_active_subscription: true, 
+            subscription_end_date: $end_date,
+            subscription_plan: $plan
+          },
+          on_conflict: { 
+            constraint: user_profiles_pkey, 
+            update_columns: [has_active_subscription, subscription_end_date, subscription_plan] 
+          }
         ) {
           id
           has_active_subscription
           subscription_end_date
+          subscription_plan
         }
       }
     `, {
       user_id,
-      end_date: endDate.toISOString()
+      end_date: endDate.toISOString(),
+      plan
     }, {
       headers: {
         'x-hasura-admin-secret': process.env.NHOST_ADMIN_SECRET || ''

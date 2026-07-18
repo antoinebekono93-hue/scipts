@@ -11,19 +11,19 @@ export async function getAllDataByType(dataType = 'categories') {
       {
         slug: 'marketing',
         metadata: {
-          title: 'Partagez vos créations avec le monde entier',
-          subtitle: 'LA NOUVELLE ÉCONOMIE CRÉATIVE',
-          description: "Collectionnez et vendez des œuvres d'art numériques grâce aux meilleurs outils en ligne.",
+          title: 'Téléchargez des scripts et applications premium',
+          subtitle: 'LE MEILLEUR CATALOGUE DE SCRIPTS',
+          description: "Des milliers de scripts PHP, templates HTML et plugins WordPress à votre disposition.",
           image: { imgix_url: '/images/content/hero.png' }
         }
       },
       {
         slug: 'introduction',
         metadata: {
-          title: 'Découvrez de nouvelles collections',
+          title: 'Découvrez nos nouveautés',
           subtitle: 'Une plateforme innovante',
-          description: '1.00 ETH',
-          image: { imgix_url: '/images/content/upload-pic.jpg' }
+          description: 'Abonnement dès 15$/mois',
+          image: { imgix_url: '/images/content/hero.png' }
         }
       }
     ]
@@ -58,9 +58,11 @@ export async function getAllDataByType(dataType = 'categories') {
           metadata: {
             logo: { imgix_url: '/logo.png' },
             menu: [
-              { title: 'Découvrir', url: '/search' },
-              { title: 'Créer un élément', url: '/upload-details' },
-              { title: 'À propos de nous', url: '/about' }
+              { title: 'Home', url: '/' },
+              { title: 'WordPress', url: '/search?category=wordpress' },
+              { title: 'WHMCS', url: '/search?category=whmcs' },
+              { title: 'Scripts', url: '/search?category=scripts' },
+              { title: 'Applications', url: '/search?category=applications' }
             ]
           }
         }
