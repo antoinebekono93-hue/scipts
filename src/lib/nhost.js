@@ -39,36 +39,22 @@ export async function getAllDataByType(dataType = 'categories') {
   }
 
   if (dataType === 'navigation') {
-    const { data, error } = await nhost.graphql.request(`
-      query {
-        navigation {
-          id
-          title
-          slug
-          metadata
-          created_at
+    // On force le menu mocké car la table Nhost est incomplète
+    return [
+      {
+        id: 'mock-nav',
+        metadata: {
+          logo: { imgix_url: '/logo.png' },
+          menu: [
+            { title: 'Home', url: '/' },
+            { title: 'WordPress', url: '/search?category=wordpress' },
+            { title: 'WHMCS', url: '/search?category=whmcs' },
+            { title: 'Scripts', url: '/search?category=scripts' },
+            { title: 'Applications', url: '/search?category=applications' }
+          ]
         }
       }
-    `)
-    if (error || !data || !data.navigation || data.navigation.length === 0) {
-      // Fallback si la table navigation est vide dans Nhost
-      return [
-        {
-          id: 'mock-nav',
-          metadata: {
-            logo: { imgix_url: '/logo.png' },
-            menu: [
-              { title: 'Home', url: '/' },
-              { title: 'WordPress', url: '/search?category=wordpress' },
-              { title: 'WHMCS', url: '/search?category=whmcs' },
-              { title: 'Scripts', url: '/search?category=scripts' },
-              { title: 'Applications', url: '/search?category=applications' }
-            ]
-          }
-        }
-      ]
-    }
-    return data.navigation
+    ]
   }
 
   if (dataType === 'categories') {
