@@ -6,6 +6,38 @@ export const nhost = new NhostClient({
 })
 
 export async function getAllDataByType(dataType = 'categories') {
+  if (dataType === 'landings') {
+    return [
+      {
+        slug: 'marketing',
+        metadata: {
+          title: 'Partagez vos créations avec le monde entier',
+          subtitle: 'LA NOUVELLE ÉCONOMIE CRÉATIVE',
+          description: "Collectionnez et vendez des œuvres d'art numériques grâce aux meilleurs outils en ligne.",
+          image: { imgix_url: '/images/content/figures.png' }
+        }
+      },
+      {
+        slug: 'introduction',
+        metadata: {
+          title: 'Découvrez de nouvelles collections',
+          subtitle: 'Une plateforme innovante',
+          description: '1.00 ETH',
+          image: { imgix_url: '/images/content/upload-pic.jpg' }
+        }
+      }
+    ]
+  }
+
+  if (dataType === 'reviews') {
+    return [
+      {
+        title: 'Review 1',
+        metadata: { author: 'Alice', text: 'Incroyable marketplace !', image: '/images/content/avatar.png' }
+      }
+    ]
+  }
+
   if (dataType === 'navigation') {
     const { data, error } = await nhost.graphql.request(`
       query {
