@@ -1,0 +1,131 @@
+import { NhostClient } from '@nhost/nextjs'
+
+export const nhost = new NhostClient({
+  subdomain: process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'dspprxgtnymanbtxneyo',
+  region: process.env.NEXT_PUBLIC_NHOST_REGION || 'us-east-1'
+})
+
+export async function getAllDataByType(dataType = 'categories') {
+  if (dataType === 'navigation') {
+    const { data, error } = await nhost.graphql.request(`
+      query {
+        navigation {
+          id
+          title
+          slug
+          metadata
+          created_at
+        }
+      }
+    `)
+    if (error) {
+      console.error(error)
+      return []
+    }
+    return data.navigation
+  }
+
+  if (dataType === 'categories') {
+    const { data, error } = await nhost.graphql.request(`
+      query {
+        categories {
+          id
+          title
+          slug
+          metadata
+          created_at
+        }
+      }
+    `)
+    if (error) {
+      console.error(error)
+      return []
+    }
+    return data.categories
+  }
+  
+  return []
+}
+
+export async function getDataByCategory(id) {
+  const { data, error } = await nhost.graphql.request(`
+    query GetProductsByCategory($categoryId: uuid!) {
+      products(where: { category_id: { _eq: $categoryId } }) {
+        id
+        title
+        slug
+        description
+        price
+        count
+        color
+        image_id
+        category_id
+        created_at
+      }
+    }
+  `, { categoryId: id })
+  
+  if (error) {
+    console.error(error)
+    return []
+  }
+  
+  // Format to match Cosmic structure
+  return data.products.map(p => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    created_at: p.created_at,
+    metadata: {
+      description: p.description,
+      price: p.price,
+      count: p.count,
+      color: p.color,
+      categories: [p.category_id],
+      image: {
+        imgix_url: nhost.storage.getPublicUrl({ fileId: p.image_id })
+      }
+    }
+  }))
+}
+
+export async function getDataBySlug(slug) {
+  const { data, error } = await nhost.graphql.request(`
+    query GetProductBySlug($slug: String!) {
+      products(where: { slug: { _eq: $slug } }) {
+        id
+        title
+        slug
+        description
+        price
+        count
+        color
+        image_id
+        category_id
+        created_at
+      }
+    }
+  `, { slug })
+  
+  if (error) {
+    console.error(error)
+    return []
+  }
+
+  return data.products.map(p => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    created_at: p.created_at,
+    metadata: {
+      description: p.description,
+      price: p.price,
+      count: p.count,
+      color: p.color,
+      categories: [p.category_id],
+      image: {
+        imgix_url: nhost.storage.getPublicUrl({ fileId: p.image_id })
+      }
+    }
+  }))
+}

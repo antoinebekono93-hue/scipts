@@ -5,7 +5,7 @@ import { useStateContext } from '../utils/context/StateContext'
 import Layout from '../components/Layout'
 import Image from 'next/image'
 import chooseBySlug from '../utils/chooseBySlug'
-import { getAllDataByType } from '../lib/cosmic'
+import { getAllDataByType } from '../lib/nhost'
 
 import styles from '../styles/pages/NotFound.module.sass'
 import { PageMeta } from '../components/Meta'

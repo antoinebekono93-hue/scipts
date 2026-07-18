@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useStateContext } from '../utils/context/StateContext'
 import useDebounce from '../utils/hooks/useDebounce'
 import useFetchData from '../utils/hooks/useFetchData'
-import { getAllDataByType, getDataByCategory } from '../lib/cosmic'
+import { getAllDataByType, getDataByCategory } from '../lib/nhost'
 
 import Layout from '../components/Layout'
 import Icon from '../components/Icon'

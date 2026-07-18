@@ -11,7 +11,7 @@ import {
   Description,
 } from '../screens/Home'
 import chooseBySlug from '../utils/chooseBySlug'
-import { getDataByCategory, getAllDataByType } from '../lib/cosmic'
+import { getDataByCategory, getAllDataByType } from '../lib/nhost'
 
 const Home = ({
   reviews,

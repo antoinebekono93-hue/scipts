@@ -6,6 +6,7 @@ import Loader from '../Loader'
 import registerFields from '../../utils/constants/registerFields'
 import { useStateContext } from '../../utils/context/StateContext'
 import { setToken } from '../../utils/token'
+import { nhost } from '../../lib/nhost'
 
 import styles from './OAuth.module.sass'
 
@@ -41,29 +42,28 @@ const OAuth = ({ className, handleClose, handleOAuth, disable }) => {
       fillFiledMessage?.length && setFillFiledMessage('')
       setLoading(true)
       if ((email, password)) {
-        const auth = await fetch('/api/auth', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        })
-        const cosmicUser = await auth.json()
-        if (cosmicUser?.hasOwnProperty('user')) {
-          setCosmicUser(cosmicUser['user'])
-          setToken({
-            id: cosmicUser['user']['id'],
-            first_name: cosmicUser['user']['first_name'],
-            avatar_url: cosmicUser['user']['avatar_url'],
-          })
+        // Try sign in
+        let res = await nhost.auth.signIn({ email, password })
+        if (res.error && res.error.message.includes('not found')) {
+          res = await nhost.auth.signUp({ email, password })
+        }
+        
+        if (res.session?.user) {
+          const user = res.session.user
+          const mappedUser = {
+            id: user.id,
+            first_name: user.displayName || email.split('@')[0],
+            avatar_url: user.avatarUrl,
+          }
+          setCosmicUser(mappedUser)
+          setToken(mappedUser)
 
           setFillFiledMessage('Congrats!')
-          handleOAuth(cosmicUser['user'])
+          handleOAuth(mappedUser)
           setFields(registerFields)
           handleClose()
         } else {
-          setFillFiledMessage('Please first register in Cosmic')
+          setFillFiledMessage(res.error?.message || 'Authentication failed')
         }
       } else {
         setFillFiledMessage('Please fill all fields')
@@ -83,16 +83,10 @@ const OAuth = ({ className, handleClose, handleOAuth, disable }) => {
   return (
     <div className={cn(className, styles.transfer)}>
       <div className={cn('h4', styles.title)}>
-        Authentication with{' '}
-        <AppLink target="_blank" href={`https://www.cosmicjs.com`}>
-          Cosmic
-        </AppLink>
+        Authentication with Nhost
       </div>
       <div className={styles.text}>
-        To create an item you need to register an account at{' '}
-        <AppLink target="_blank" href={`https://www.cosmicjs.com`}>
-          Cosmic
-        </AppLink>
+        To create an item you need to register or log in.
       </div>
       <div className={styles.error}>{fillFiledMessage}</div>
       <form className={styles.form} action="submit" onSubmit={submitForm}>

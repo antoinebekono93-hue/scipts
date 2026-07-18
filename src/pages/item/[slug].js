@@ -13,7 +13,7 @@ import {
   getDataBySlug,
   getAllDataByType,
   getDataByCategory,
-} from '../../lib/cosmic'
+} from '../../lib/nhost'
 import getStripe from '../../lib/getStripe'
 
 import styles from '../../styles/pages/Item.module.sass'

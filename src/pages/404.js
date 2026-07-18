@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import cn from 'classnames'
 import Layout from '../components/Layout'
 import Image from '../components/Image'
-import { getAllDataByType } from '../lib/cosmic'
+import { getAllDataByType } from '../lib/nhost'
 
 import styles from '../styles/pages/NotFound.module.sass'
 

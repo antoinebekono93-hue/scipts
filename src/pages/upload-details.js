@@ -12,7 +12,7 @@ import Modal from '../components/Modal'
 import OAuth from '../components/OAuth'
 import Preview from '../screens/UploadDetails/Preview'
 import Cards from '../screens/UploadDetails/Cards'
-import { getAllDataByType } from '../lib/cosmic'
+import { getAllDataByType, nhost } from '../lib/nhost'
 import { OPTIONS } from '../utils/constants/appConstants'
 import createFields from '../utils/constants/createFields'
 import { getToken } from '../utils/token'
@@ -55,16 +55,12 @@ const Upload = ({ navigationItems, categoriesType }) => {
   }, [cosmicUser])
 
   const handleUploadFile = async uploadFile => {
-    const formData = new FormData()
-    formData.append('file', uploadFile)
-
-    const uploadResult = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    })
-
-    const mediaData = await uploadResult.json()
-    await setUploadMedia(mediaData?.['media'])
+    const { fileMetadata, error } = await nhost.storage.upload({ file: uploadFile })
+    if (error) {
+      console.error(error)
+      return
+    }
+    setUploadMedia(fileMetadata)
   }
 
   const handleOAuth = useCallback(
@@ -112,34 +108,47 @@ const Upload = ({ navigationItems, categoriesType }) => {
       if (cosmicUser && title && color && count && price && uploadMedia) {
         fillFiledMessage && setFillFiledMessage(false)
 
-        const response = await fetch('/api/create', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+
+        const { data, error } = await nhost.graphql.request(`
+          mutation InsertProduct($product: products_insert_input!) {
+            insert_products_one(object: $product) {
+              id
+              slug
+              title
+            }
+          }
+        `, {
+          product: {
             title,
             description,
-            price,
-            count,
+            price: Number(price),
+            count: Number(count),
             color,
-            categories: [chooseCategory],
-            image: uploadMedia['name'],
-          }),
+            category_id: chooseCategory,
+            image_id: uploadMedia.id,
+            slug,
+            user_id: cosmicUser.id
+          }
         })
 
-        const createdItem = await response.json()
+        if (error) {
+          console.error(error)
+          setFillFiledMessage('Error creating item')
+          return
+        }
 
-        if (createdItem['object']) {
+        const createdItem = data?.insert_products_one
+
+        if (createdItem) {
           toast.success(
-            `Successfully created ${createdItem['object']['title']} item`,
+            `Successfully created ${createdItem.title} item`,
             {
               position: 'bottom-right',
             }
           )
 
-          push(`item/${createdItem['object']['slug']}`)
+          push(`item/${createdItem.slug}`)
         }
       } else {
         setFillFiledMessage(true)
