@@ -104,6 +104,8 @@ export async function getDataByCategory(id) {
         color
         image_id
         category_id
+        is_premium
+        file_url
         created_at
       }
     }
@@ -125,6 +127,8 @@ export async function getDataByCategory(id) {
       price: p.price,
       count: p.count,
       color: p.color,
+      is_premium: p.is_premium,
+      file_url: p.file_url,
       categories: [p.category_id],
       image: {
         imgix_url: nhost.storage.getPublicUrl({ fileId: p.image_id })
@@ -146,6 +150,8 @@ export async function getDataBySlug(slug) {
         color
         image_id
         category_id
+        is_premium
+        file_url
         created_at
       }
     }
@@ -166,6 +172,8 @@ export async function getDataBySlug(slug) {
       price: p.price,
       count: p.count,
       color: p.color,
+      is_premium: p.is_premium,
+      file_url: p.file_url,
       categories: [p.category_id],
       image: {
         imgix_url: nhost.storage.getPublicUrl({ fileId: p.image_id })

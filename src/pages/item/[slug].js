@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import cn from 'classnames'
 import toast from 'react-hot-toast'
 import { useStateContext } from '../../utils/context/StateContext'
+import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import HotBid from '../../components/HotBid'
 import Discover from '../../screens/Home/Discover'
@@ -20,16 +21,37 @@ import styles from '../../styles/pages/Item.module.sass'
 
 const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
   const { onAdd, cartItems, cosmicUser } = useStateContext()
+  const { push } = useRouter()
 
   const [activeIndex, setActiveIndex] = useState(0)
   const [visibleAuthModal, setVisibleAuthModal] = useState(false)
+  const [isSubscribed, setIsSubscribed] = useState(false)
 
-  const counts = itemInfo?.[0]?.metadata?.count
-    ? Array(itemInfo[0]?.metadata?.count)
-        .fill(1)
-        .map((_, index) => index + 1)
-    : ['Not Available']
-  const [option, setOption] = useState(counts[0])
+  useEffect(() => {
+    async function checkSub() {
+      if (cosmicUser?.id) {
+        try {
+          const { data } = await nhost.graphql.request(`
+            query {
+              user_profiles_by_pk(id: "${cosmicUser.id}") {
+                has_active_subscription
+                subscription_end_date
+              }
+            }
+          `)
+          if (data?.user_profiles_by_pk?.has_active_subscription) {
+            const endDate = new Date(data.user_profiles_by_pk.subscription_end_date)
+            if (endDate > new Date()) {
+              setIsSubscribed(true)
+            }
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+    checkSub()
+  }, [cosmicUser])
 
   const handleAddToCart = () => {
     cosmicUser?.hasOwnProperty('id') ? handleCheckout() : handleOAuth()
@@ -121,21 +143,28 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
               ))}
             </div>
             <div className={styles.actions}>
-              <div className={styles.dropdown}>
-                <Dropdown
-                  className={styles.dropdown}
-                  value={option}
-                  setValue={setOption}
-                  options={counts}
-                />
-              </div>
               <div className={styles.btns}>
-                <button
-                  className={cn('button', styles.button)}
-                  onClick={handleAddToCart}
-                >
-                  Buy Now
-                </button>
+                {(!itemInfo[0]?.metadata?.is_premium || isSubscribed) ? (
+                  <button
+                    className={cn('button', styles.button)}
+                    onClick={() => {
+                      if (!cosmicUser?.id) {
+                        handleOAuth()
+                      } else {
+                        window.open(itemInfo[0]?.metadata?.file_url || '#', '_blank')
+                      }
+                    }}
+                  >
+                    Télécharger le Fichier
+                  </button>
+                ) : (
+                  <button
+                    className={cn('button', styles.button)}
+                    onClick={() => push('/subscription')}
+                  >
+                    Débloquer avec l'Abonnement (15$)
+                  </button>
+                )}
               </div>
             </div>
           </div>
