@@ -172,9 +172,9 @@ const Upload = ({ navigationItems, categoriesType }) => {
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata || navigation}>
       <PageMeta
-        title={'Create Item | uNFT Marketplace'}
+        title={'Create Item | Script Marketplace'}
         description={
-          'uNFT Marketplace built with Cosmic CMS, Next.js, and the Stripe API'
+          'Marketplace built with Nhost, Next.js, and Flutterwave'
         }
       />
       <div className={cn('section', styles.section)}>
