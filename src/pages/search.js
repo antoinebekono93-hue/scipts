@@ -136,15 +136,15 @@ const Search = ({ categoriesGroup, navigationItems, categoryData }) => {
     return () => {
       isMount = false
     }
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm, debouncedMinTerm, debouncedMaxTerm])
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <PageMeta
-        title={'Discover | uNFT Marketplace'}
+        title={'Discover | Script Marketplace'}
         description={
-          'uNFT Marketplace built with Cosmic CMS, Next.js, and the Stripe API'
+          'Marketplace built with Nhost, Next.js, and Flutterwave'
         }
       />
       <div className={cn('section-pt80', styles.section)}>

@@ -162,7 +162,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                     className={cn('button', styles.button)}
                     onClick={() => push('/subscription')}
                   >
-                    Débloquer avec l'Abonnement (15$)
+                    Débloquer avec l&apos;Abonnement (15$)
                   </button>
                 )}
               </div>
