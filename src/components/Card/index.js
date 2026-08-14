@@ -7,6 +7,7 @@ import Image from '../Image'
 
 const Card = ({ className, item }) => {
   const [visible, setVisible] = useState(false)
+  const isPremium = item?.metadata?.is_premium === true
 
   return (
     <div className={cn(styles.card, className)} aria-hidden="true">
@@ -18,6 +19,9 @@ const Card = ({ className, item }) => {
             alt="Card"
             objectFit="cover"
           />
+          <div className={cn(styles.badge, isPremium ? styles.premium : styles.free)}>
+            {isPremium ? ' Premium' : ' Gratuit'}
+          </div>
           <div className={styles.control}>
             <div className={styles.category}>{item?.title}</div>
             <button

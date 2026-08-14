@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react'
+import { useRouter } from 'next/router'
 import { useStateContext } from '../utils/context/StateContext'
 import Layout from '../components/Layout'
 import {
@@ -13,6 +14,8 @@ import {
 import chooseBySlug from '../utils/chooseBySlug'
 import { getDataByCategory, getAllDataByType } from '../lib/nhost'
 
+import styles from '../styles/pages/Search.module.sass'
+
 const Home = ({
   reviews,
   landing,
@@ -20,7 +23,8 @@ const Home = ({
   categoryTypes,
   navigationItems,
 }) => {
-  const { categories, onCategoriesChange, setNavigation } = useStateContext()
+  const { categories, onCategoriesChange, setNavigation, cosmicUser, hasActiveSubscription } = useStateContext()
+  const { push } = useRouter()
 
   const handleContextAdd = useCallback(
     (category, data, navigation) => {
@@ -52,6 +56,8 @@ const Home = ({
     navigationItems,
   ])
 
+  const showPremiumCTA = !cosmicUser?.id || !hasActiveSubscription
+
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <Description info={chooseBySlug(landing, 'marketing')} />
@@ -62,6 +68,39 @@ const Home = ({
       />
       <Selection info={categoriesGroup['groups']} type={categoryTypes} />
       <Intro info={chooseBySlug(landing, 'introduction')} />
+      {showPremiumCTA && (
+        <section className="premium-cta-section">
+          <div className="container">
+            <div className="premium-cta-card">
+              <div className="premium-cta-icon">★</div>
+              <h2 className="premium-cta-title">Débloquez TOUT le catalogue Premium</h2>
+              <p className="premium-cta-desc">
+                Accédez à des milliers de scripts PHP, plugins WordPress, templates HTML et applications exclusives.
+              </p>
+              <div className="premium-cta-plans">
+                <button 
+                  className="premium-cta-btn quarterly"
+                  onClick={() => push('/subscription')}
+                >
+                  <span className="plan-name">Trimestriel</span>
+                  <span className="plan-price">10$</span>
+                  <span className="plan-period">/ 3 mois</span>
+                </button>
+                <button 
+                  className="premium-cta-btn annual"
+                  onClick={() => push('/subscription')}
+                >
+                  <span className="plan-badge">-47%</span>
+                  <span className="plan-name">Annuel</span>
+                  <span className="plan-price">16$</span>
+                  <span className="plan-period">/ an</span>
+                </button>
+              </div>
+              <p className="premium-cta-note">Renouvellement automatique • Annulable à tout moment</p>
+            </div>
+          </div>
+        </section>
+      )}
       <Partners info={reviews} />
       <Discover
         info={categoriesGroup['groups']}

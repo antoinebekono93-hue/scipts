@@ -10,7 +10,7 @@ import { nhost } from '../../lib/nhost'
 
 import styles from './OAuth.module.sass'
 
-const OAuth = ({ className, handleClose, handleOAuth, disable }) => {
+const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscription }) => {
   const { setCosmicUser } = useStateContext()
   const { push } = useRouter()
 
@@ -61,7 +61,12 @@ const OAuth = ({ className, handleClose, handleOAuth, disable }) => {
           setFillFiledMessage('Congrats!')
           handleOAuth(mappedUser)
           setFields(registerFields)
-          handleClose()
+          
+          if (redirectToSubscription) {
+            push('/subscription')
+          } else {
+            handleClose()
+          }
         } else {
           setFillFiledMessage(res.error?.message || 'Authentication failed')
         }
@@ -77,6 +82,8 @@ const OAuth = ({ className, handleClose, handleOAuth, disable }) => {
       setCosmicUser,
       handleOAuth,
       handleClose,
+      push,
+      redirectToSubscription,
     ]
   )
 

@@ -1,0 +1,198 @@
+import { NhostClient } from '@nhost/nhost-js'
+
+const nhost = new NhostClient({
+  subdomain: process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'dspprxgtnymanbtxneyo',
+  region: process.env.NEXT_PUBLIC_NHOST_REGION || 'us-east-1',
+  adminSecret: process.env.NHOST_ADMIN_SECRET
+})
+
+const ADMIN_HEADERS = {
+  'x-hasura-admin-secret': process.env.NHOST_ADMIN_SECRET || ''
+}
+
+export default async function handler(req, res) {
+  if (req.method === 'GET') {
+    return getProducts(req, res)
+  }
+  if (req.method === 'POST') {
+    return createProduct(req, res)
+  }
+  if (req.method === 'PUT') {
+    return updateProduct(req, res)
+  }
+  if (req.method === 'DELETE') {
+    return deleteProduct(req, res)
+  }
+  return res.status(405).json({ message: 'Method Not Allowed' })
+}
+
+async function getProducts(req, res) {
+  const { data, error } = await nhost.graphql.request(`
+    query {
+      products(order_by: { created_at: desc }) {
+        id
+        title
+        slug
+        description
+        price
+        count
+        color
+        category_id
+        is_premium
+        file_url
+        metadata
+        created_at
+        category {
+          title
+          slug
+        }
+      }
+    }
+  `, {}, { headers: ADMIN_HEADERS })
+
+  if (error) {
+    return res.status(500).json({ error })
+  }
+  return res.status(200).json({ products: data.products })
+}
+
+async function createProduct(req, res) {
+  const { title, description, price, count, color, category_id, is_premium, file_url, demo_url } = req.body
+
+  if (!title || !category_id) {
+    return res.status(400).json({ message: 'title and category_id are required' })
+  }
+
+  const slug = slugify(title)
+
+  const metadata = {
+    demo_url: demo_url || null,
+    is_premium: is_premium !== false,
+    last_updated: new Date().toISOString(),
+    tags: []
+  }
+
+  const { data, error } = await nhost.graphql.request(`
+    mutation CreateProduct($object: products_insert_input!) {
+      insert_products_one(object: $object) {
+        id
+        title
+        slug
+        description
+        price
+        count
+        color
+        category_id
+        is_premium
+        file_url
+        metadata
+      }
+    }
+  `, {
+    object: {
+      title,
+      slug,
+      description: description || '',
+      price: Number(price) || 0,
+      count: Number(count) || 1,
+      color: color || '#3498db',
+      category_id,
+      is_premium: is_premium !== false,
+      file_url: file_url || null,
+      metadata
+    }
+  }, { headers: ADMIN_HEADERS })
+
+  if (error) {
+    return res.status(500).json({ error })
+  }
+  return res.status(200).json({ product: data.insert_products_one })
+}
+
+async function updateProduct(req, res) {
+  const { id, title, description, price, count, color, category_id, is_premium, file_url, demo_url } = req.body
+
+  if (!id) {
+    return res.status(400).json({ message: 'id is required' })
+  }
+
+  const setObject = {}
+
+  if (typeof title === 'string' && title) {
+    setObject.title = title
+    setObject.slug = slugify(title)
+  }
+  if (typeof description === 'string') setObject.description = description
+  if (typeof price === 'number') setObject.price = price
+  if (typeof count === 'number') setObject.count = count
+  if (typeof color === 'string') setObject.color = color
+  if (typeof category_id === 'string') setObject.category_id = category_id
+  if (typeof is_premium === 'boolean') setObject.is_premium = is_premium
+  if (typeof file_url === 'string') setObject.file_url = file_url || null
+
+  if (demo_url !== undefined) {
+    const { data: existing } = await nhost.graphql.request(`
+      query GetProduct($id: uuid!) {
+        products_by_pk(id: $id) {
+          metadata
+        }
+      }
+    `, { id }, { headers: ADMIN_HEADERS })
+
+    const currentMetadata = existing?.products_by_pk?.metadata || {}
+    setObject.metadata = { ...currentMetadata, demo_url: demo_url || null }
+  }
+
+  const { data, error } = await nhost.graphql.request(`
+    mutation UpdateProduct($id: uuid!, $set: products_set_input!) {
+      update_products_by_pk(pk_columns: { id: $id }, _set: $set) {
+        id
+        title
+        slug
+        description
+        price
+        count
+        color
+        category_id
+        is_premium
+        file_url
+        metadata
+      }
+    }
+  `, { id, set: setObject }, { headers: ADMIN_HEADERS })
+
+  if (error) {
+    return res.status(500).json({ error })
+  }
+  return res.status(200).json({ product: data.update_products_by_pk })
+}
+
+async function deleteProduct(req, res) {
+  const { id } = req.body
+
+  if (!id) {
+    return res.status(400).json({ message: 'id is required' })
+  }
+
+  const { data, error } = await nhost.graphql.request(`
+    mutation DeleteProduct($id: uuid!) {
+      delete_products_by_pk(id: $id) {
+        id
+      }
+    }
+  `, { id }, { headers: ADMIN_HEADERS })
+
+  if (error) {
+    return res.status(500).json({ error })
+  }
+  return res.status(200).json({ success: true, deleted: data.delete_products_by_pk?.id })
+}
+
+function slugify(name) {
+  return String(name)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}

@@ -6,6 +6,7 @@ import {
   useCallback,
 } from 'react'
 import { toast } from 'react-hot-toast'
+import { nhost } from '../../lib/nhost'
 
 const Context = createContext()
 
@@ -19,6 +20,9 @@ export const StateContext = ({ children }) => {
     groups: [],
     types: {},
   })
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
+  const [subscriptionPlan, setSubscriptionPlan] = useState('free')
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState(null)
 
   const onCategoriesChange = useCallback(content => {
     setCategories(prevFields => ({ ...prevFields, ...content }))
@@ -68,6 +72,45 @@ export const StateContext = ({ children }) => {
     setCartItems(newCartItems)
   }
 
+  const refreshSubscription = useCallback(async (userId) => {
+    if (!userId) return
+    try {
+      const { data, error } = await nhost.graphql.request(`
+        query GetProfile($user_id: uuid!) {
+          user_profiles_by_pk(id: $user_id) {
+            has_active_subscription
+            subscription_plan
+            subscription_end_date
+          }
+        }
+      `, { user_id: userId })
+      
+      if (error) {
+        console.error('Erreur refresh subscription:', error)
+        return
+      }
+      
+      if (data?.user_profiles_by_pk) {
+        const profile = data.user_profiles_by_pk
+        const isActive = profile.has_active_subscription && 
+          profile.subscription_end_date && 
+          new Date(profile.subscription_end_date) > new Date()
+        
+        setHasActiveSubscription(isActive)
+        setSubscriptionPlan(profile.subscription_plan || 'free')
+        setSubscriptionEndDate(profile.subscription_end_date)
+      }
+    } catch (err) {
+      console.error('Erreur refresh subscription:', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (cosmicUser?.id) {
+      refreshSubscription(cosmicUser.id)
+    }
+  }, [cosmicUser?.id, refreshSubscription])
+
   return (
     <Context.Provider
       value={{
@@ -85,6 +128,10 @@ export const StateContext = ({ children }) => {
         setNavigation,
         cosmicUser,
         setCosmicUser,
+        hasActiveSubscription,
+        subscriptionPlan,
+        subscriptionEndDate,
+        refreshSubscription,
       }}
     >
       {children}

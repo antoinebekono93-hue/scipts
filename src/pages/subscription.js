@@ -11,16 +11,21 @@ import { PageMeta } from '../components/Meta'
 import styles from '../styles/pages/Subscription.module.sass'
 
 const Subscription = ({ navigationItems }) => {
-  const { cosmicUser } = useStateContext()
+  const { cosmicUser, hasActiveSubscription, subscriptionPlan, refreshSubscription } = useStateContext()
   const { push } = useRouter()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
 
-  // Configuration de base pour Flutterwave
+  useEffect(() => {
+    if (cosmicUser?.id) {
+      refreshSubscription(cosmicUser.id)
+    }
+  }, [cosmicUser?.id, refreshSubscription])
+
   const config = {
     public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || 'FLWPUBK_TEST-SANDBOXDEMOKEY-X',
-    tx_ref: Date.now().toString(),
-    amount: selectedPlan?.price || 15,
+    tx_ref: `sub_${selectedPlan?.type}_${Date.now()}`,
+    amount: selectedPlan?.price || 10,
     currency: 'USD',
     payment_options: 'card,mobilemoney,ussd',
     customer: {
@@ -29,7 +34,9 @@ const Subscription = ({ navigationItems }) => {
     },
     customizations: {
       title: `Abonnement ${selectedPlan?.name}`,
-      description: 'Accès illimité aux scripts premium',
+      description: selectedPlan?.type === 'quarterly'
+        ? 'Accès Premium 3 mois - Renouvellement automatique'
+        : 'Accès Premium 1 an - Renouvellement automatique - Économisez 47%',
       logo: 'https://scipts.vercel.app/logo.png',
     },
     meta: {
@@ -41,48 +48,48 @@ const Subscription = ({ navigationItems }) => {
   const handleFlutterPayment = useFlutterwave(config)
 
   const handlePayment = (plan) => {
-    if (!cosmicUser?.hasOwnProperty('id')) {
+    if (!cosmicUser?.id) {
       toast.error('Veuillez vous connecter pour vous abonner.')
       return
     }
 
     if (plan.price === 0) {
-      push('/search') // Redirige vers le catalogue pour le plan gratuit
+      push('/search')
       return
     }
 
     setSelectedPlan(plan)
-    
-    // Le setState est asynchrone, donc on utilise un setTimeout léger pour s'assurer que config est à jour
+
     setTimeout(() => {
       setLoading(true)
       handleFlutterPayment({
         callback: async (response) => {
            if (response.status === "successful") {
-              toast.success("Paiement réussi ! Activation en cours...")
-              try {
-                const res = await fetch('/api/webhook/flutterwave', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    transaction_id: response.transaction_id, 
-                    user_id: cosmicUser.id,
-                    amount: plan.price
-                  })
-                })
-                
-                if (res.ok) {
-                  toast.success("Abonnement activé avec succès !")
-                  push('/search')
-                } else {
-                  toast.error("Erreur lors de l'activation.")
-                }
-              } catch (err) {
-                console.error(err)
-              }
-           }
-           closePaymentModal()
-           setLoading(false)
+             toast.success("Paiement réussi ! Activation en cours...")
+             try {
+               const res = await fetch('/api/webhook/flutterwave', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({
+                   transaction_id: response.transaction_id,
+                   user_id: cosmicUser.id,
+                   amount: plan.price,
+                   plan_type: plan.type
+                 })
+               })
+
+               if (res.ok) {
+                 toast.success("Abonnement activé avec succès !")
+                 push('/search')
+               } else {
+                 toast.error("Erreur lors de l'activation.")
+               }
+             } catch (err) {
+               console.error(err)
+             }
+          }
+          closePaymentModal()
+          setLoading(false)
         },
         onClose: () => {
           setLoading(false)
@@ -91,32 +98,39 @@ const Subscription = ({ navigationItems }) => {
     }, 100)
   }
 
+  const isCurrentPlan = (planType) => {
+    return hasActiveSubscription && subscriptionPlan === planType
+  }
+
   const plans = [
     {
       name: 'Gratuit',
       type: 'free',
       price: 0,
-      period: 'Illimité',
-      features: ['Téléchargements gratuits illimités', 'Mises à jour standards', 'Support communautaire'],
-      btnText: 'Explorer',
+      period: 'À vie',
+      features: ['Apps gratuites illimitées', 'Mises à jour standards', 'Support communautaire'],
+      btnText: 'Continuer Gratuit',
+      current: !hasActiveSubscription
     },
     {
-      name: 'Mensuel',
-      type: 'monthly',
-      price: 15,
-      period: 'Facturé par mois',
-      features: ['Téléchargements Premium illimités', 'Scripts & Plugins Pro', 'Mises à jour gratuites pendant 1 mois', 'Support prioritaire'],
-      btnText: 'Souscrire',
-      popular: false
+      name: 'Trimestriel',
+      type: 'quarterly',
+      price: 10,
+      period: 'Facturé tous les 3 mois (10$) - Renouvellement auto',
+      features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique'],
+      btnText: "S'abonner 10$ / 3 mois",
+      popular: false,
+      current: isCurrentPlan('quarterly')
     },
     {
       name: 'Annuel',
       type: 'annual',
-      price: 99,
-      period: 'Facturé par an',
-      features: ['Téléchargements Premium illimités', 'Scripts & Plugins Pro', 'Mises à jour gratuites pendant 1 an', 'Économisez 45%'],
-      btnText: 'Souscrire (99$)',
-      popular: true
+      price: 16,
+      period: 'Facturé par an (16$) - Économisez 47% - Renouvellement auto',
+      features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique', 'Meilleur rapport qualité/prix'],
+      btnText: "S'abonner 16$ / an",
+      popular: true,
+      current: isCurrentPlan('annual')
     }
   ]
 
@@ -124,31 +138,35 @@ const Subscription = ({ navigationItems }) => {
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <PageMeta
         title={'Nos Abonnements | Script Marketplace'}
-        description={'Débloquez tous les scripts PHP, applications et templates.'}
+        description={'Débloquez tout le catalogue Premium : scripts PHP, plugins WordPress, templates. 10$/trimestre ou 16$/an.'}
       />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>
           <h1 className={styles.title}>Choisissez votre abonnement</h1>
           <div className={styles.subtitle}>
-            Des milliers de scripts et templates de qualité professionnelle à portée de clic.
+            Accédez à des milliers de scripts et templates professionnels. Renouvellement automatique, annulable à tout moment.
           </div>
-          
+
           <div className={styles.grid}>
             {plans.map((plan, index) => (
-              <div key={index} className={cn(styles.card, { [styles.popular]: plan.popular })}>
+              <div key={index} className={cn(styles.card, { [styles.popular]: plan.popular, [styles.current]: plan.current })}>
                 {plan.popular && <div className={styles.popularTag}>Le plus populaire</div>}
+                {plan.current && hasActiveSubscription && <div className={styles.currentTag}>Plan actuel</div>}
                 <div className={styles.planName}>{plan.name}</div>
-                <div className={styles.price}>${plan.price}</div>
+                <div className={styles.price}>
+                  ${plan.price}
+                  {plan.price > 0 && <span className={styles.period}>/{plan.type === 'quarterly' ? '3 mois' : 'an'}</span>}
+                </div>
                 <div className={styles.period}>{plan.period}</div>
                 <ul className={styles.features}>
                   {plan.features.map((feat, i) => (
-                    <li key={i}>✅ {feat}</li>
+                    <li key={i}>��� {feat}</li>
                   ))}
                 </ul>
                 <button
-                  className={cn('button', styles.button)}
+                  className={cn('button', styles.button, { [styles.disabled]: plan.current || loading })}
                   onClick={() => handlePayment(plan)}
-                  disabled={loading}
+                  disabled={loading || plan.current}
                 >
                   {loading && selectedPlan?.type === plan.type ? '...' : plan.btnText}
                 </button>

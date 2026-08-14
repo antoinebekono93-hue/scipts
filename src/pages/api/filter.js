@@ -49,6 +49,9 @@ export default async function filterHandler(req, res) {
           color
           image_id
           category_id
+          is_premium
+          file_url
+          metadata
           created_at
         }
       }
@@ -69,9 +72,14 @@ export default async function filterHandler(req, res) {
         price: p.price,
         count: p.count,
         color: p.color,
+        is_premium: p.is_premium,
+        file_url: p.file_url,
+        demo_url: p.metadata?.demo_url || null,
         categories: [p.category_id],
         image: {
-          imgix_url: nhost.storage.getPublicUrl({ fileId: p.image_id })
+          imgix_url: p.image_id
+            ? nhost.storage.getPublicUrl({ fileId: p.image_id })
+            : '/images/content/hero.png'
         }
       }
     }))

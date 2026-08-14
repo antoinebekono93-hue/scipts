@@ -162,7 +162,17 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                     className={cn('button', styles.button)}
                     onClick={() => push('/subscription')}
                   >
-                    Débloquer avec l&apos;Abonnement (15$)
+                    Débloquer Premium (10$/3 mois ou 16$/an)
+                  </button>
+                )}
+                {itemInfo[0]?.metadata?.demo_url && (
+                  <button
+                    className={cn('button-stroke', styles.button)}
+                    onClick={() =>
+                      window.open(itemInfo[0]?.metadata?.demo_url, '_blank')
+                    }
+                  >
+                    Voir la Démo
                   </button>
                 )}
               </div>
@@ -183,6 +193,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
           className={styles.steps}
           handleOAuth={handleOAuth}
           handleClose={() => setVisibleAuthModal(false)}
+          redirectToSubscription={true}
         />
       </Modal>
     </Layout>
