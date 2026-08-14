@@ -93,6 +93,46 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
     }
   }
 
+  const handleDownload = async () => {
+    try {
+      const token = nhost.auth.getAccessToken()
+      const res = await fetch(`/api/download/${itemInfo[0]?.slug}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+
+      if (res.status === 401) {
+        toast.error('Veuillez vous connecter')
+        handleOAuth()
+        return
+      }
+      if (res.status === 403) {
+        toast.error('Un abonnement actif est requis')
+        push('/subscription')
+        return
+      }
+      if (!res.ok) {
+        toast.error('Erreur de téléchargement')
+        return
+      }
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download =
+        res.headers
+          .get('content-disposition')
+          ?.match(/filename="?([^"]+)"?/)?.[1] || `${itemInfo[0]?.slug || 'download'}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error(err)
+      toast.error('Erreur réseau')
+    }
+  }
+
   const gallery =
     Array.isArray(itemInfo[0]?.metadata?.gallery) &&
     itemInfo[0]?.metadata?.gallery.length > 0
@@ -181,7 +221,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                       if (!cosmicUser?.id) {
                         handleOAuth()
                       } else {
-                        window.open(itemInfo[0]?.metadata?.file_url || '#', '_blank')
+                        handleDownload()
                       }
                     }}
                   >
