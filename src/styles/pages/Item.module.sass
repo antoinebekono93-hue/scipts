@@ -66,6 +66,30 @@
     width: 100%
     height: 560px
 
+.gallery
+    display: flex
+    gap: 12px
+    margin-top: 16px
+
+.galleryItem
+    position: relative
+    width: 88px
+    height: 64px
+    border-radius: 10px
+    overflow: hidden
+    border: 2px solid $neutrals6
+    background: $neutrals7
+    padding: 0
+    cursor: pointer
+    transition: border-color .2s
+    +dark
+        border-color: $neutrals3
+        background: $neutrals2
+    &:hover
+        border-color: $purple
+    &.galleryActive
+        border-color: $purple
+
 .details
     display: flex
     flex-direction: column

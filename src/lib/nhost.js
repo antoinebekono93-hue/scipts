@@ -105,6 +105,22 @@ export async function getDataByCategory(id) {
     return []
   }
   
+  function getPlaceholderImage(title) {
+  const text = encodeURIComponent(title)
+  return `https://ui-avatars.com/api/?name=${text}&background=3498db&color=fff&size=400&format=png`
+}
+
+  function buildGallery(p) {
+    const extra = Array.isArray(p.metadata?.gallery) ? p.metadata.gallery : []
+    const gallery = [
+      ...(p.image_id
+        ? [{ id: p.image_id, url: nhost.storage.getPublicUrl({ fileId: p.image_id }) }]
+        : []),
+      ...extra,
+    ]
+    return gallery
+  }
+
   // Format to match Cosmic structure
   return data.products.map(p => ({
     id: p.id,
@@ -120,10 +136,11 @@ export async function getDataByCategory(id) {
       file_url: p.file_url,
       demo_url: p.metadata?.demo_url || null,
       categories: [p.category_id],
+      gallery: buildGallery(p),
       image: {
         imgix_url: p.image_id
           ? nhost.storage.getPublicUrl({ fileId: p.image_id })
-          : '/images/content/hero.png'
+          : getPlaceholderImage(p.title)
       }
     }
   }))
@@ -169,10 +186,11 @@ export async function getDataBySlug(slug) {
       file_url: p.file_url,
       demo_url: p.metadata?.demo_url || null,
       categories: [p.category_id],
+      gallery: buildGallery(p),
       image: {
         imgix_url: p.image_id
           ? nhost.storage.getPublicUrl({ fileId: p.image_id })
-          : '/images/content/hero.png'
+          : getPlaceholderImage(p.title)
       }
     }
   }))

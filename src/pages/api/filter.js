@@ -61,6 +61,11 @@ export default async function filterHandler(req, res) {
       return res.status(400).json({ error })
     }
 
+    function getPlaceholderImage(title) {
+      const text = encodeURIComponent(title)
+      return `https://ui-avatars.com/api/?name=${text}&background=3498db&color=fff&size=400&format=png`
+    }
+
     // Format response to match original Cosmic structure
     const objects = data.products.map(p => ({
       id: p.id,
@@ -79,7 +84,7 @@ export default async function filterHandler(req, res) {
         image: {
           imgix_url: p.image_id
             ? nhost.storage.getPublicUrl({ fileId: p.image_id })
-            : '/images/content/hero.png'
+            : getPlaceholderImage(p.title)
         }
       }
     }))

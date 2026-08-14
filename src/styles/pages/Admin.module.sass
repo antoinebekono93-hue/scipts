@@ -22,6 +22,104 @@
     margin-bottom: 16px
     +body-bold-2
 
+.imageSection
+    margin-bottom: 24px
+    display: flex
+    flex-direction: column
+    gap: 12px
+
+.gallery
+    display: flex
+    flex-wrap: wrap
+    gap: 12px
+
+.tile
+    position: relative
+    width: 110px
+    aspect-ratio: 1/1
+    border-radius: 12px
+    border: 2px solid $neutrals6
+    background: $neutrals7
+    overflow: hidden
+    +dark
+        border-color: $neutrals3
+        background: $neutrals2
+
+.tileUploading
+    border-color: $purple
+
+.coverBadge
+    position: absolute
+    top: 6px
+    left: 6px
+    padding: 2px 8px
+    border-radius: 4px
+    background: $purple
+    color: $neutrals8
+    font-size: 10px
+    font-weight: 700
+    text-transform: uppercase
+    z-index: 2
+
+.removeBtn
+    position: absolute
+    top: 6px
+    right: 6px
+    z-index: 3
+    width: 24px
+    height: 24px
+    border-radius: 50%
+    border: none
+    background: $pink
+    color: $neutrals8
+    font-size: 12px
+    line-height: 1
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    &:disabled
+        opacity: .5
+        cursor: not-allowed
+
+.tileUploadingLabel
+    position: absolute
+    inset: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    background: rgba($neutrals1, .55)
+    color: $neutrals8
+    +caption-2
+    font-weight: 700
+
+.addTile
+    display: flex
+    align-items: center
+    justify-content: center
+    border-style: dashed
+    cursor: pointer
+    &:hover
+        border-color: $purple
+
+.addLabel
+    +caption-2
+    color: $neutrals4
+    pointer-events: none
+
+.fileInput
+    position: absolute
+    inset: 0
+    opacity: 0
+    cursor: pointer
+    width: 100%
+    height: 100%
+
+.hint
+    +caption-2
+    color: $neutrals4
+    margin: 0
+
 .grid
     display: grid
     grid-template-columns: repeat(2, 1fr)
@@ -118,6 +216,16 @@
 
 .nameCell
     font-weight: 600
+
+.thumb
+    width: 48px
+    height: 32px
+    object-fit: cover
+    border-radius: 6px
+
+.noThumb
+    color: $neutrals4
+    font-size: 12px
 
 .badge
     display: inline-block

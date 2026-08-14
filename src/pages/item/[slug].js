@@ -24,6 +24,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
   const { push } = useRouter()
 
   const [activeIndex, setActiveIndex] = useState(0)
+  const [activeImage, setActiveImage] = useState(0)
   const [visibleAuthModal, setVisibleAuthModal] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
 
@@ -91,6 +92,12 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
     }
   }
 
+  const gallery =
+    Array.isArray(itemInfo[0]?.metadata?.gallery) &&
+    itemInfo[0]?.metadata?.gallery.length > 0
+      ? itemInfo[0]?.metadata?.gallery
+      : [{ url: itemInfo[0]?.metadata?.image?.imgix_url }]
+
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <div className={cn('section', styles.section)}>
@@ -105,12 +112,34 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
               <div className={styles.image}>
                 <Image
                   size={{ width: '100%', height: '100%' }}
-                  srcSet={`${itemInfo[0]?.metadata?.image?.imgix_url}`}
-                  src={itemInfo[0]?.metadata?.image?.imgix_url}
+                  srcSet={`${gallery[activeImage]?.url}`}
+                  src={gallery[activeImage]?.url}
                   alt="Item"
                   objectFit="cover"
                 />
               </div>
+              {gallery.length > 1 && (
+                <div className={styles.gallery}>
+                  {gallery.map((img, index) => (
+                    <button
+                      type="button"
+                      key={index}
+                      className={cn(
+                        styles.galleryItem,
+                        index === activeImage && styles.galleryActive
+                      )}
+                      onClick={() => setActiveImage(index)}
+                    >
+                      <Image
+                        size={{ width: '100%', height: '100%' }}
+                        src={img.url}
+                        alt={`Image ${index + 1}`}
+                        objectFit="cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className={styles.details}>

@@ -15,6 +15,9 @@ export default async function handler(req, res) {
     return getProducts(req, res)
   }
   if (req.method === 'POST') {
+    if (req.query.upload === 'true') {
+      return uploadImage(req, res)
+    }
     return createProduct(req, res)
   }
   if (req.method === 'PUT') {
@@ -37,6 +40,7 @@ async function getProducts(req, res) {
         price
         count
         color
+        image_id
         category_id
         is_premium
         file_url
@@ -56,8 +60,64 @@ async function getProducts(req, res) {
   return res.status(200).json({ products: data.products })
 }
 
+async function uploadImage(req, res) {
+  const contentType = req.headers['content-type'] || ''
+  if (!contentType.includes('multipart/form-data')) {
+    return res.status(400).json({ message: 'Content-Type must be multipart/form-data' })
+  }
+
+  const formidable = (await import('formidable')).default
+  const form = formidable({ multiples: false })
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('Upload parse error:', err)
+      return res.status(500).json({ message: 'Upload failed' })
+    }
+
+    const file = files.file
+    if (!file || !file[0]) {
+      return res.status(400).json({ message: 'No file provided' })
+    }
+
+    const uploadedFile = file[0]
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(uploadedFile.mimetype)) {
+      return res.status(400).json({ message: 'Invalid file type. Use JPEG, PNG, WebP or GIF' })
+    }
+    if (uploadedFile.size > 5 * 1024 * 1024) {
+      return res.status(400).json({ message: 'File too large. Max 5MB' })
+    }
+
+    try {
+      const fs = await import('fs')
+      const fileBuffer = fs.default.readFileSync(uploadedFile.filepath)
+
+      const { data, error } = await nhost.storage.upload({
+        file: fileBuffer,
+        name: uploadedFile.originalFilename || 'image.png'
+      }, { headers: ADMIN_HEADERS })
+
+      if (error) {
+        console.error('Nhost upload error:', error)
+        return res.status(500).json({ message: 'Storage upload failed' })
+      }
+
+      fs.default.unlinkSync(uploadedFile.filepath)
+
+      return res.status(200).json({
+        file_id: data.id,
+        public_url: nhost.storage.getPublicUrl({ fileId: data.id })
+      })
+    } catch (err) {
+      console.error('Upload error:', err)
+      return res.status(500).json({ message: 'Upload failed' })
+    }
+  })
+}
+
 async function createProduct(req, res) {
-  const { title, description, price, count, color, category_id, is_premium, file_url, demo_url } = req.body
+  const { title, description, price, count, color, category_id, is_premium, file_url, demo_url, image_id, gallery } = req.body
 
   if (!title || !category_id) {
     return res.status(400).json({ message: 'title and category_id are required' })
@@ -69,7 +129,8 @@ async function createProduct(req, res) {
     demo_url: demo_url || null,
     is_premium: is_premium !== false,
     last_updated: new Date().toISOString(),
-    tags: []
+    tags: [],
+    gallery: Array.isArray(gallery) ? gallery : []
   }
 
   const { data, error } = await nhost.graphql.request(`
@@ -82,6 +143,7 @@ async function createProduct(req, res) {
         price
         count
         color
+        image_id
         category_id
         is_premium
         file_url
@@ -96,6 +158,7 @@ async function createProduct(req, res) {
       price: Number(price) || 0,
       count: Number(count) || 1,
       color: color || '#3498db',
+      image_id: image_id || null,
       category_id,
       is_premium: is_premium !== false,
       file_url: file_url || null,
@@ -110,7 +173,7 @@ async function createProduct(req, res) {
 }
 
 async function updateProduct(req, res) {
-  const { id, title, description, price, count, color, category_id, is_premium, file_url, demo_url } = req.body
+  const { id, title, description, price, count, color, category_id, is_premium, file_url, demo_url, image_id, gallery } = req.body
 
   if (!id) {
     return res.status(400).json({ message: 'id is required' })
@@ -126,11 +189,12 @@ async function updateProduct(req, res) {
   if (typeof price === 'number') setObject.price = price
   if (typeof count === 'number') setObject.count = count
   if (typeof color === 'string') setObject.color = color
+  if (typeof image_id === 'string' || image_id === null) setObject.image_id = image_id || null
   if (typeof category_id === 'string') setObject.category_id = category_id
   if (typeof is_premium === 'boolean') setObject.is_premium = is_premium
   if (typeof file_url === 'string') setObject.file_url = file_url || null
 
-  if (demo_url !== undefined) {
+  if (demo_url !== undefined || gallery !== undefined) {
     const { data: existing } = await nhost.graphql.request(`
       query GetProduct($id: uuid!) {
         products_by_pk(id: $id) {
@@ -140,7 +204,11 @@ async function updateProduct(req, res) {
     `, { id }, { headers: ADMIN_HEADERS })
 
     const currentMetadata = existing?.products_by_pk?.metadata || {}
-    setObject.metadata = { ...currentMetadata, demo_url: demo_url || null }
+    setObject.metadata = {
+      ...currentMetadata,
+      ...(demo_url !== undefined ? { demo_url: demo_url || null } : {}),
+      ...(gallery !== undefined ? { gallery: Array.isArray(gallery) ? gallery : [] } : {})
+    }
   }
 
   const { data, error } = await nhost.graphql.request(`
@@ -153,6 +221,7 @@ async function updateProduct(req, res) {
         price
         count
         color
+        image_id
         category_id
         is_premium
         file_url

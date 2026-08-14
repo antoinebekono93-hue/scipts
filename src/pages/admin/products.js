@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import cn from 'classnames'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 import Layout from '../../components/Layout'
 import { useStateContext } from '../../utils/context/StateContext'
 import { getAllDataByType } from '../../lib/nhost'
+import { processImage } from '../../utils/imageProcessor'
 import { PageMeta } from '../../components/Meta'
 
 import styles from '../../styles/pages/Admin.module.sass'
@@ -19,7 +21,12 @@ const emptyForm = {
   is_premium: true,
   file_url: '',
   demo_url: '',
+  images: [],
+  watermark: true,
 }
+
+const fileUrl = id =>
+  `https://${process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'dspprxgtnymanbtxneyo'}.${process.env.NEXT_PUBLIC_NHOST_REGION || 'us-east-1'}.nhost.run/v1/files/${id}`
 
 const AdminProducts = ({ navigationItems, categories }) => {
   const { cosmicUser } = useStateContext()
@@ -27,6 +34,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
   const [form, setForm] = useState(emptyForm)
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
+  const [uploading, setUploading] = useState(false)
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
@@ -56,6 +64,60 @@ const AdminProducts = ({ navigationItems, categories }) => {
     }))
   }
 
+  const uploadImage = async file => {
+    setUploading(true)
+    try {
+      const { blob, dataUrl, resized, watermarked } = await processImage(file, {
+        watermark: form.watermark,
+      })
+
+      const tile = { id: null, url: dataUrl, uploading: true }
+      setForm(prev => ({ ...prev, images: [...prev.images, tile] }))
+
+      const formData = new FormData()
+      formData.append('file', blob, `image.${blob.type === 'image/gif' ? 'gif' : 'webp'}`)
+
+      const res = await fetch('/api/admin/products?upload=true', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (res.ok && data.file_id) {
+        setForm(prev => ({
+          ...prev,
+          images: prev.images.map(img =>
+            img === tile ? { id: data.file_id, url: data.public_url, uploading: false } : img
+          ),
+        }))
+        toast.success(
+          `${resized ? 'Redimensionnée + ' : ''}${watermarked ? 'Filigrane + ' : ''}Image uploadée !`
+        )
+      } else {
+        setForm(prev => ({ ...prev, images: prev.images.filter(img => img !== tile) }))
+        toast.error(data.message || 'Erreur upload')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Erreur réseau upload')
+    }
+    setUploading(false)
+  }
+
+  const handleImagesChange = e => {
+    const files = e.target.files
+    if (files && files.length) {
+      Array.from(files).forEach(uploadImage)
+    }
+    e.target.value = ''
+  }
+
+  const handleRemoveImage = index => {
+    setForm(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }))
+  }
+
   const handleSubmit = async e => {
     e.preventDefault()
     if (!form.title || !form.category_id) {
@@ -65,6 +127,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
 
     setLoading(true)
     const isEdit = !!form.id
+    const images = form.images.filter(img => img.id)
     try {
       const res = await fetch('/api/admin/products', {
         method: isEdit ? 'PUT' : 'POST',
@@ -80,6 +143,8 @@ const AdminProducts = ({ navigationItems, categories }) => {
           is_premium: form.is_premium,
           file_url: form.file_url,
           demo_url: form.demo_url,
+          image_id: images[0]?.id || null,
+          gallery: images.slice(1).map(({ id, url }) => ({ id, url })),
         }),
       })
       const data = await res.json()
@@ -99,6 +164,12 @@ const AdminProducts = ({ navigationItems, categories }) => {
 
   const handleEdit = product => {
     const meta = product.metadata || {}
+    const gallery = [
+      ...(product.image_id
+        ? [{ id: product.image_id, url: fileUrl(product.image_id), uploading: false }]
+        : []),
+      ...(Array.isArray(meta.gallery) ? meta.gallery.map(img => ({ ...img, uploading: false })) : []),
+    ]
     setForm({
       id: product.id,
       title: product.title,
@@ -110,6 +181,8 @@ const AdminProducts = ({ navigationItems, categories }) => {
       is_premium: product.is_premium !== false,
       file_url: product.file_url || '',
       demo_url: meta.demo_url || '',
+      images: gallery,
+      watermark: true,
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -159,6 +232,76 @@ const AdminProducts = ({ navigationItems, categories }) => {
             <h2 className={styles.subtitle}>
               {form.id ? 'Modifier le produit' : 'Ajouter un produit'}
             </h2>
+
+            <div className={styles.imageSection}>
+              <label className={styles.label}>
+                Images du produit — la 1ère sert de couverture
+              </label>
+              <div className={styles.gallery}>
+                {form.images.map((img, index) => (
+                  <div
+                    key={img.id || `uploading-${index}`}
+                    className={cn(styles.tile, img.uploading && styles.tileUploading)}
+                  >
+                    {img.url && (
+                      <Image
+                        src={img.url}
+                        alt="Aperçu"
+                        fill
+                        sizes="120px"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    )}
+                    {index === 0 && !img.uploading && (
+                      <span className={styles.coverBadge}>Couverture</span>
+                    )}
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      onClick={() => handleRemoveImage(index)}
+                      disabled={uploading}
+                      title="Supprimer"
+                    >
+                      ✕
+                    </button>
+                    {img.uploading && (
+                      <span className={styles.tileUploadingLabel}>Upload...</span>
+                    )}
+                  </div>
+                ))}
+                <label
+                  className={cn(styles.tile, styles.addTile)}
+                  title="Ajouter une image"
+                >
+                  <input
+                    type="file"
+                    name="images"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImagesChange}
+                    className={styles.fileInput}
+                    disabled={uploading}
+                    multiple
+                  />
+                  <span className={styles.addLabel}>
+                    {uploading ? 'Upload...' : '+ Ajouter'}
+                  </span>
+                </label>
+              </div>
+              <label className={styles.check}>
+                <input
+                  type="checkbox"
+                  name="watermark"
+                  checked={form.watermark}
+                  onChange={handleChange}
+                />
+                Appliquer un filigrane
+              </label>
+              <p className={styles.hint}>
+                JPEG, PNG, WebP, GIF — redimensionnées et optimisées côté client
+                (max 1600px), filigrane appliqué avant upload.
+              </p>
+            </div>
+
             <div className={styles.grid}>
               <div className={styles.field}>
                 <label className={styles.label}>Titre *</label>
@@ -297,6 +440,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>Image</th>
                   <th>Titre</th>
                   <th>Catégorie</th>
                   <th>Prix</th>
@@ -308,6 +452,20 @@ const AdminProducts = ({ navigationItems, categories }) => {
               <tbody>
                 {filteredProducts.map(p => (
                   <tr key={p.id}>
+                    <td>
+                      {p.image_id ? (
+                        <Image
+                          src={fileUrl(p.image_id)}
+                          alt={p.title}
+                          width={48}
+                          height={32}
+                          className={styles.thumb}
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <span className={styles.noThumb}>—</span>
+                      )}
+                    </td>
                     <td className={styles.nameCell}>{p.title}</td>
                     <td>{getCategoryTitle(p.category_id)}</td>
                     <td>${p.price}</td>
@@ -353,7 +511,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
                 ))}
                 {!filteredProducts.length && (
                   <tr>
-                    <td colSpan={6} className={styles.empty}>
+                    <td colSpan={7} className={styles.empty}>
                       Aucun produit trouvé
                     </td>
                   </tr>
