@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import cn from 'classnames'
 import AppLink from '../AppLink'
 import Group from './Group'
@@ -21,7 +21,7 @@ const Footers = ({ navigation }) => {
                 src={navigation['logo']?.imgix_url}
                 srcDark={navigation['logo']?.imgix_url}
                 alt="Logo"
-                objectFit="cntain"
+                objectFit="contain"
               />
             </AppLink>
             <div className={styles.info}>The New Creative Economy.</div>
@@ -34,43 +34,25 @@ const Footers = ({ navigation }) => {
             <Group className={styles.group} item={navigation?.['menu']} />
           </div>
           <div className={styles.col}>
-            <AppLink href={`https://www.cosmicjs.com/features`}>
-              <p className={styles.category}>About Cosmic</p>
+            <AppLink href="/about">
+              <p className={styles.category}>À propos</p>
             </AppLink>
-            <AppLink href={`https://docs.cosmicjs.com/`}>
-              <p className={styles.text}>Documentation</p>
+            <AppLink href="/search">
+              <p className={styles.text}>Rechercher</p>
             </AppLink>
-            <AppLink href={`https://www.cosmicjs.com/contact`}>
-              <p className={styles.text}>Contact Us</p>
+            <AppLink href="/upload-details">
+              <p className={styles.text}>Créer un item</p>
+            </AppLink>
+            <AppLink href="/subscription">
+              <p className={styles.text}>Abonnement</p>
             </AppLink>
             <SocialMedia className={styles.form} />
-            <AppLink
-              href={`https://cosmicjs.us5.list-manage.com/subscribe/post?u=15433aab34aefd5450c23fd94&id=028c29b6ca`}
-            >
-              <button
-                aria-hidden="true"
-                className={cn('button', styles.button)}
-              >
-                Subscribe Newsletter
-              </button>
-            </AppLink>
           </div>
         </div>
       </div>
       <div>
         <div className={styles.copyright} aria-hidden="true">
-          <span className={styles.cosmicGroup}>
-            <p className={styles.powered}>Powered by </p>
-            <a href="https://www.cosmicjs.com">
-              <Image
-                className={styles.cosmic}
-                size={{ width: '110px', height: '90px' }}
-                src="/cosmic.svg"
-                alt="Cosmic Logo"
-                objectFit="contain"
-              />
-            </a>
-          </span>
+          © {new Date().getFullYear()} Script Marketplace
         </div>
       </div>
     </footer>

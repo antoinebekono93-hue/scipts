@@ -36,24 +36,19 @@ export const Meta = () => {
 }
 
 export const PageMeta = ({ title, description }) => {
+  const ogImage = 'https://scipts.vercel.app/logo.png'
   return (
     <Head>
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta
-        property="og:image"
-        content="https://imgix.cosmicjs.com/5df3a450-0160-11ed-b7be-d956591ad437-unft-2.png?w=1000"
-      />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:type" content="website" />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@CosmicJS" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta
-        name="twitter:image"
-        content="https://imgix.cosmicjs.com/5df3a450-0160-11ed-b7be-d956591ad437-unft-2.png?w=1000"
-      />
+      <meta name="twitter:image" content={ogImage} />
     </Head>
   )
 }

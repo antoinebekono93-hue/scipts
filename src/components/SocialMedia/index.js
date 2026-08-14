@@ -12,23 +12,23 @@ import styles from './SocialMedia.module.sass'
 const socialMedia = [
   {
     Icon: FiTwitter,
-    url: 'https://twitter.com/cosmicjs',
+    url: 'https://github.com/antoinebekono93-hue/scipts',
   },
   {
     Icon: FiFacebook,
-    url: 'https://www.facebook.com/cosmicjs',
+    url: 'https://github.com/antoinebekono93-hue/scipts',
   },
   {
     Icon: FiLinkedin,
-    url: 'https://www.linkedin.com/company/cosmicjs/',
+    url: 'https://github.com/antoinebekono93-hue/scipts',
   },
   {
     Icon: FiYoutube,
-    url: 'https://www.youtube.com/cosmicjs',
+    url: 'https://github.com/antoinebekono93-hue/scipts',
   },
   {
     Icon: FiSlack,
-    url: 'https://cosmcijs.slack.com',
+    url: 'https://github.com/antoinebekono93-hue/scipts',
   },
 ]
 

@@ -38,14 +38,15 @@ const Layout = ({ children, title, navigationPaths }) => {
       />
       <div className={styles.github}>
         <p className={styles.source}>
-          The source code for this marketplace app is{' '}
+          Le code source de cette marketplace est{' '}
           <span className={styles.github}>
             <a
               className={styles.github}
-              href="https://github.com/cosmicjs/unft-marketplace"
-              target="_parent"
+              href="https://github.com/antoinebekono93-hue/scipts"
+              target="_blank"
+              rel="noreferrer"
             >
-              available on GitHub
+              disponible sur GitHub
             </a>
           </span>
           .

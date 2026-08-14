@@ -25,6 +25,16 @@ export async function getAllDataByType(dataType = 'categories') {
           description: 'Abonnement dès 15$/mois',
           image: { imgix_url: '/images/content/hero.png' }
         }
+      },
+      {
+        slug: 'about',
+        metadata: {
+          title: 'À propos de Script Marketplace',
+          subtitle: 'Des milliers de scripts et applications premium',
+          description:
+            'Script Marketplace est une plateforme de scripts PHP, templates HTML, plugins WordPress, modules WHMCS et applications web. Accédez à tout le catalogue avec un abonnement simple : 10$/3 mois ou 16$/an.',
+          image: { imgix_url: '/images/content/figures.png' }
+        }
       }
     ]
   }

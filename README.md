@@ -1,85 +1,69 @@
-## Next.js Marketplace
+# Script Marketplace
 
-Now updated to connect to the new dashboard and [Cosmic JavaScript SDK](https://www.npmjs.com/package/@cosmicjs/sdk). [Read the article](https://www.cosmicjs.com/blog/4-steps-to-update-the-nextjs-marketplace-template) to learn about the latest updates.
+Marketplace de scripts PHP, templates HTML, plugins WordPress, modules WHMCS et applications web. Backend **Nhost** (PostgreSQL + GraphQL + Storage + Auth), paiements par abonnement **Flutterwave**, checkout **Stripe** pour les achats unitaires, déployé sur **Vercel**.
 
-The Next.js Marketplace is a template that you can use to start your own digital art marketplace. Download for free.
+## Fonctionnalités
 
-![Cosmic uNFT](https://user-images.githubusercontent.com/1950722/178328933-c6f0008f-a188-4678-9420-404dd1f02871.gif)
+- Catalogue de produits filtrable (recherche, couleur, prix, catégorie)
+- Abonnement 3 niveaux : Gratuit / Trimestriel 10$ / Annuel 16$ (Flutterwave)
+- Téléchargements protégés : `/api/download/[slug]` vérifie le token + l'abonnement actif avant de servir le fichier (streaming, proxy des URLs)
+- Panier + checkout Stripe
+- Page produit avec galerie d'images
+- Admin `/admin/products` : CRUD produits, upload d'images (redimensionnement + filigrane côté client), galerie multi-images, badge Premium/Gratuit
+- Auth Nhost (email/password), cron d'expiration des abonnements (Vercel)
 
-## Technology used
+## Stack
 
-This template uses the following technologies:
+- [Next.js](https://nextjs.org/) 14 (App Router / Pages Router)
+- [Nhost](https://nhost.io/) : GraphQL, Auth, Storage
+- [Flutterwave](https://www.flutterwave.com/) : abonnements
+- [Stripe](https://stripe.com/) : checkout panier
+- [sharp](https://sharp.pixelplumbing.com/), Sass, react-slick, react-hot-toast
 
-- [Next.js](https://nextjs.org/) - scalable and high-performance **React.js** framework for modern web development. Provides a large set of features, such as hybrid rendering, route prefetching, automatic image optimization, and internationalization, out of the box.
-- [Cosmic](https://www.cosmicjs.com/) - fast, fully managed [headless CMS](https://www.cosmicjs.com/headless-cms) that enables us to quickly manage and create website content including UGC (user-generated content).
-- [Stripe](https://stripe.com/) - payments infrastructure that provides API tools to receive one-time and subscription payments.
-
-### Links
-
-- [View the live demo](https://c-marketplace-cosmicjs.vercel.app/)
-- [Install the template](https://www.cosmicjs.com/marketplace/templates/nextjs-marketplace)
-- [Read how it was built](https://www.cosmicjs.com/articles/build-a-digital-art-marketplace-with-nextjs-cosmic-and-stripe)
-
-## Getting started
-
-1. First, install the [template](https://www.cosmicjs.com/marketplace/templates/unft-marketplace) into your Cosmic account to get the demo content ready.
-2. Then download and install the code on your machine.
+## Démarrage
 
 ```bash
-git clone https://github.com/cosmicjs/unft-marketplace
-cd unft-marketplace
-pnpm install
-# or
-yarn
-# or
 npm install
-```
-
-### Environment variables
-
-You'll need to create a `.env` file in the root of the project and add the access keys for Cosmic and Stripe. This can be done by copying the `.env.example`.
-
-```bash
-cp .env.example .env
-```
-
-**Cosmic**: Go to [Cosmic](https://app.cosmicjs.com/) and from the Bucket that you installed the app template go to _Bucket Settings > API Access_ and get your API access keys.
-
-**Stripe**: Log in to [Stripe](https://dashboard.stripe.com/) and get your keys in the **for developers** section.
-
-Add your keys to the `.env` file like so:
-
-```bash
-# .env
-NEXT_PUBLIC_COSMIC_BUCKET_SLUG=your_cosmic_slug
-NEXT_PUBLIC_COSMIC_READ_KEY=your_cosmic_read_key
-COSMIC_WRITE_KEY=your_cosmic_write_key
-
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-```
-
-### Then run the development server
-
-```bash
-pnpm dev
-# OR
-yarn dev
-# OR
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+### Variables d'environnement
 
-<p>Use the following button to deploy to <a href="https://vercel.com/" rel="noopener noreferrer" target="_blank">Vercel</a>. You will need to add your environment variables before deployment.</p>
-<p>
-<a href="https://vercel.com/import/git?c=1&s=https://github.com/cosmicjs/unft-marketplace&env=NEXT_PUBLIC_COSMIC_BUCKET_SLUG,NEXT_PUBLIC_COSMIC_READ_KEY,COSMIC_WRITE_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,STRIPE_SECRET_KEY&envDescription=Required%20to%20connect%20the%20app%20with%20Cosmic&envLink=https://vercel.link/cms-cosmic-env" rel="noopener noreferrer" target="_blank"><img src="https://cdn.cosmicjs.com/d3f0d5e0-c064-11ea-9a05-6f8a16b0b14c-deploy-to-vercel.svg" style="width: 100px;" class="fr-fic fr-dib fr-fil"></a>
-</p>
+Copiez `.env.example` vers `.env.local` et remplissez les valeurs :
 
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+# .env.local
+NEXT_PUBLIC_NHOST_SUBDOMAIN=dspprxgtnymanbtxneyo
+NEXT_PUBLIC_NHOST_REGION=us-east-1
+NHOST_ADMIN_SECRET=ton_admin_secret_nhost   # requis pour l'admin et les webhooks
 
-## License
+NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY=
+CRON_SECRET=
 
-This project is published under the [MIT](LICENSE) license.
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+```
+
+- **Nhost** : dashboard Nhost → Settings → Secrets & Keys
+- **Flutterwave** : dashboard → Settings → API keys (clé publique)
+- **Stripe** : dashboard → Developers → API keys
+
+## Base de données
+
+- `init_schema.sql` : schéma initial (tables `products`, `categories`, `user_profiles`)
+- `migration_scripts.sql` : migrations et permissions Hasura
+- `hasura_cron_subscription_check.sql` : cron d'expiration des abonnements (option Hasura)
+- `scripts/generate-products-seed.js` → `seed/seed_products.sql` : 200 produits de démo
+
+## Déploiement sur Vercel
+
+1. Poussez le repo sur GitHub
+2. Importez-le dans [Vercel](https://vercel.com)
+3. Ajoutez les variables d'environnement ci-dessus (projet → Settings → Environment Variables)
+4. Le cron `/api/cron/expire-subscriptions` est déjà déclaré dans `vercel.json` (02:00 UTC)
+
+## Licences
+
+[MIT](LICENSE)
