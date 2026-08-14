@@ -41,7 +41,7 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
       e.preventDefault()
       fillFiledMessage?.length && setFillFiledMessage('')
       setLoading(true)
-      if ((email, password)) {
+      if (email && password) {
         // Try sign in
         let res = await nhost.auth.signIn({ email, password })
         if (res.error && res.error.message.includes('not found')) {

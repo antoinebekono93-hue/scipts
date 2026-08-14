@@ -1,29 +1,45 @@
 import Stripe from 'stripe'
 import rateLimit from '../../utils/rateLimit'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+let stripe
+
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null
+  }
+  if (!stripe) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+  }
+  return stripe
+}
 
 export default async function handler(req, res) {
   if (rateLimit(req, res)) return
 
   if (req.method === 'POST') {
     try {
+      const stripe = getStripe()
+      if (!stripe) {
+        return res.status(503).json({ message: 'Stripe non configuré (STRIPE_SECRET_KEY manquant)' })
+      }
+
       const params = {
         submit_type: 'pay',
         mode: 'payment',
         payment_method_types: ['card'],
         billing_address_collection: 'auto',
         line_items: req.body.map(item => {
-          const img = item.metadata.image.imgix_url
+          const price = Number(item.metadata?.price) || 0
+          const img = item.metadata?.image?.imgix_url
 
           return {
             price_data: {
               currency: 'usd',
               product_data: {
                 name: item.title,
-                images: [img],
+                ...(img ? { images: [img] } : {}),
               },
-              unit_amount: item.metadata.price * 100,
+              unit_amount: Math.round(price * 100),
             },
             adjustable_quantity: {
               enabled: true,

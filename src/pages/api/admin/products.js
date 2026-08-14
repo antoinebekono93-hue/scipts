@@ -11,6 +11,11 @@ const ADMIN_HEADERS = {
 }
 
 export default async function handler(req, res) {
+  if (!process.env.NHOST_ADMIN_SECRET) {
+    return res.status(503).json({
+      message: 'NHOST_ADMIN_SECRET non configuré. Ajoutez-le dans .env.local / Vercel.'
+    })
+  }
   if (req.method === 'GET') {
     return getProducts(req, res)
   }

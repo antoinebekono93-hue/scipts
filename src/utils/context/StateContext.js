@@ -28,10 +28,15 @@ export const StateContext = ({ children }) => {
     setCategories(prevFields => ({ ...prevFields, ...content }))
   }, [])
 
-  const onAdd = (product, quantity) => {
-    const checkProductInCart = cartItems.find(item => item._id === product._id)
+  const getProductId = product => product?.id ?? product?._id
+  const getPrice = product => Number(product?.metadata?.price ?? product?.price) || 0
 
-    setTotalPrice(prevTotalPrice => prevTotalPrice + product.price * quantity)
+  const onAdd = (product, quantity = 1) => {
+    const productId = getProductId(product)
+    const price = getPrice(product)
+    const checkProductInCart = cartItems.find(item => getProductId(item) === productId)
+
+    setTotalPrice(prevTotalPrice => prevTotalPrice + price * quantity)
     setTotalQuantities(prevTotalQuantities => prevTotalQuantities + quantity)
 
     toast.success(`${quantity} of ${product.title} added to the cart.`, {
@@ -40,7 +45,7 @@ export const StateContext = ({ children }) => {
 
     if (checkProductInCart) {
       const updatedCartItems = cartItems.map(cartProduct => {
-        if (cartProduct._id === product._id)
+        if (getProductId(cartProduct) === productId)
           return {
             ...cartProduct,
             quantity: cartProduct.quantity + quantity,
@@ -59,12 +64,12 @@ export const StateContext = ({ children }) => {
   }
 
   const onRemove = product => {
-    const foundProduct = cartItems.find(item => item._id === product._id)
-    const newCartItems = cartItems.filter(item => item._id !== product._id)
+    const productId = getProductId(product)
+    const foundProduct = cartItems.find(item => getProductId(item) === productId)
+    const newCartItems = cartItems.filter(item => getProductId(item) !== productId)
 
     setTotalPrice(
-      prevTotalPrice =>
-        prevTotalPrice - foundProduct.price * foundProduct.quantity
+      prevTotalPrice => prevTotalPrice - getPrice(foundProduct) * foundProduct.quantity
     )
     setTotalQuantities(
       prevTotalQuantities => prevTotalQuantities - foundProduct.quantity

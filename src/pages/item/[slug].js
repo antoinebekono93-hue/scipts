@@ -11,6 +11,7 @@ import Modal from '../../components/Modal'
 import OAuth from '../../components/OAuth'
 import Image from '../../components/Image'
 import {
+  nhost,
   getDataBySlug,
   getAllDataByType,
   getDataByCategory,
@@ -68,7 +69,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
   )
 
   const handleCheckout = async () => {
-    const addCart = await onAdd(itemInfo[0], option)
+    const addCart = await onAdd(itemInfo[0], 1)
 
     if (addCart?.length) {
       const stripe = await getStripe()
@@ -81,7 +82,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
         body: JSON.stringify(addCart),
       })
 
-      if (response.statusCode === 500) return
+      if (!response.ok) return
 
       const data = await response.json()
       toast.loading('Redirecting...', {
