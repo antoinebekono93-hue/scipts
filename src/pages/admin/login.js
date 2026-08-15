@@ -13,6 +13,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState('login')
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -28,7 +29,21 @@ const AdminLogin = () => {
     }
     setLoading(true)
     try {
-      const res = await nhost.auth.signIn({ email, password })
+      let res
+      if (mode === 'register') {
+        res = await nhost.auth.signUp({ email, password })
+        if (res.error && res.error.message?.includes('already')) {
+          res = await nhost.auth.signIn({ email, password })
+        }
+        if (res.error) {
+          setError(res.error.message || "Inscription échouée")
+          setLoading(false)
+          return
+        }
+      } else {
+        res = await nhost.auth.signIn({ email, password })
+      }
+
       if (res.session?.user) {
         localStorage.setItem('adminAuth', JSON.stringify({
           userId: res.session.user.id,
@@ -53,7 +68,9 @@ const AdminLogin = () => {
           <div className={styles.form}>
             <h1 className={cn('h4', styles.title)}>Administration</h1>
             <p className={styles.hint} style={{ marginBottom: 24 }}>
-              Connectez-vous avec vos identifiants administrateur.
+              {mode === 'login'
+                ? 'Connectez-vous avec vos identifiants administrateur.'
+                : "Créez votre compte administrateur."}
             </p>
             {error && <p className={styles.hint} style={{ color: '#e74c3c', marginBottom: 16 }}>{error}</p>}
             <form onSubmit={handleSubmit}>
@@ -84,10 +101,27 @@ const AdminLogin = () => {
               </div>
               <div className={styles.btns} style={{ marginTop: 24 }}>
                 <button type="submit" className={cn('button', styles.btn)}>
-                  {loading ? <Loader /> : 'Se connecter'}
+                  {loading ? <Loader /> : mode === 'login' ? 'Se connecter' : "S'inscrire"}
                 </button>
               </div>
             </form>
+            <p className={styles.hint} style={{ marginTop: 16, textAlign: 'center' }}>
+              {mode === 'login' ? (
+                <span>
+                  Pas encore de compte ?{' '}
+                  <button type="button" onClick={() => { setMode('register'); setError('') }} className={styles.linkBtn}>
+                    S&apos;inscrire
+                  </button>
+                </span>
+              ) : (
+                <span>
+                  Déjà un compte ?{' '}
+                  <button type="button" onClick={() => { setMode('login'); setError('') }} className={styles.linkBtn}>
+                    Se connecter
+                  </button>
+                </span>
+              )}
+            </p>
           </div>
         </div>
       </div>
