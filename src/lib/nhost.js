@@ -109,7 +109,7 @@ export async function getDataByCategory(id) {
         created_at
       }
     }
-  `, { categoryId: id })
+  `, { categoryId })
   
   if (error) {
     console.error(error)
