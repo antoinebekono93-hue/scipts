@@ -89,6 +89,47 @@ export async function getAllDataByType(dataType = 'categories') {
   return []
 }
 
+function getPlaceholderImage(title) {
+  const text = encodeURIComponent(title)
+  return `https://ui-avatars.com/api/?name=${text}&background=3498db&color=fff&size=400&format=png`
+}
+
+function buildGallery(p) {
+  const extra = Array.isArray(p.metadata?.gallery) ? p.metadata.gallery : []
+  const gallery = [
+    ...(p.image_id
+      ? [{ id: p.image_id, url: nhost.storage.getPublicUrl({ fileId: p.image_id }) }]
+      : []),
+    ...extra,
+  ]
+  return gallery
+}
+
+function formatProduct(p) {
+  return {
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    created_at: p.created_at,
+    metadata: {
+      description: p.description,
+      price: p.price,
+      count: p.count,
+      color: p.color,
+      is_premium: p.is_premium,
+      file_url: p.file_url,
+      demo_url: p.metadata?.demo_url || null,
+      categories: [p.category_id],
+      gallery: buildGallery(p),
+      image: {
+        imgix_url: p.image_id
+          ? nhost.storage.getPublicUrl({ fileId: p.image_id })
+          : getPlaceholderImage(p.title)
+      }
+    }
+  }
+}
+
 export async function getDataByCategory(id) {
   const categoryId = await resolveCategoryId(id)
   const { data, error } = await nhost.graphql.request(`
@@ -116,46 +157,9 @@ export async function getDataByCategory(id) {
     return []
   }
   
-  function getPlaceholderImage(title) {
-  const text = encodeURIComponent(title)
-  return `https://ui-avatars.com/api/?name=${text}&background=3498db&color=fff&size=400&format=png`
+  return data.products.map(formatProduct)
 }
 
-  function buildGallery(p) {
-    const extra = Array.isArray(p.metadata?.gallery) ? p.metadata.gallery : []
-    const gallery = [
-      ...(p.image_id
-        ? [{ id: p.image_id, url: nhost.storage.getPublicUrl({ fileId: p.image_id }) }]
-        : []),
-      ...extra,
-    ]
-    return gallery
-  }
-
-  // Format to match Cosmic structure
-  return data.products.map(p => ({
-    id: p.id,
-    title: p.title,
-    slug: p.slug,
-    created_at: p.created_at,
-    metadata: {
-      description: p.description,
-      price: p.price,
-      count: p.count,
-      color: p.color,
-      is_premium: p.is_premium,
-      file_url: p.file_url,
-      demo_url: p.metadata?.demo_url || null,
-      categories: [p.category_id],
-      gallery: buildGallery(p),
-      image: {
-        imgix_url: p.image_id
-          ? nhost.storage.getPublicUrl({ fileId: p.image_id })
-          : getPlaceholderImage(p.title)
-      }
-    }
-  }))
-}
 export async function getDataBySlug(slug) {
   const { data, error } = await nhost.graphql.request(`
     query GetProductBySlug($slug: String!) {
@@ -182,28 +186,7 @@ export async function getDataBySlug(slug) {
     return []
   }
 
-  return data.products.map(p => ({
-    id: p.id,
-    title: p.title,
-    slug: p.slug,
-    created_at: p.created_at,
-    metadata: {
-      description: p.description,
-      price: p.price,
-      count: p.count,
-      color: p.color,
-      is_premium: p.is_premium,
-      file_url: p.file_url,
-      demo_url: p.metadata?.demo_url || null,
-      categories: [p.category_id],
-      gallery: buildGallery(p),
-      image: {
-        imgix_url: p.image_id
-          ? nhost.storage.getPublicUrl({ fileId: p.image_id })
-          : getPlaceholderImage(p.title)
-      }
-    }
-  }))
+  return data.products.map(formatProduct)
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
