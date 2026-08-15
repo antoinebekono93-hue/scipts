@@ -127,7 +127,7 @@ async function downloadAndUploadImage(url, index) {
 
     const name = `import-${index}-${Date.now()}${getExtension(response.headers.get('content-type'))}`
     const { data, error } = await nhost.storage.upload(
-      { file: buffer, name },
+      { file: new Blob([buffer]), name },
       { headers: ADMIN_HEADERS }
     )
 

@@ -99,7 +99,7 @@ async function uploadImage(req, res) {
       const fileBuffer = fs.default.readFileSync(uploadedFile.filepath)
 
       const { data, error } = await nhost.storage.upload({
-        file: fileBuffer,
+        file: new Blob([fileBuffer]),
         name: uploadedFile.originalFilename || 'image.png'
       }, { headers: ADMIN_HEADERS })
 
