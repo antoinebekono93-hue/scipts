@@ -71,15 +71,13 @@ const Headers = ({ navigation }) => {
                   {x.title}
                 </AppLink>
               ))}
-              {cosmicUser?.['id'] && (
-                <AppLink
+              <AppLink
                   aria-label="admin"
                   className={styles.link}
-                  href={`/admin/products`}
+                  href={`/admin/login`}
                 >
                   Admin
                 </AppLink>
-              )}
             </nav>
           </div>
           <div className={styles.version}>

@@ -17,6 +17,7 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
   const [{ email, password }, setFields] = useState(() => registerFields)
   const [fillFiledMessage, setFillFiledMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState('login')
 
   const inputElement = useRef(null)
 
@@ -42,12 +43,23 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
       fillFiledMessage?.length && setFillFiledMessage('')
       setLoading(true)
       if (email && password) {
-        // Try sign in
-        let res = await nhost.auth.signIn({ email, password })
-        if (res.error && res.error.message.includes('not found')) {
+        let res
+        if (mode === 'register') {
           res = await nhost.auth.signUp({ email, password })
+          if (res.error) {
+            setFillFiledMessage(res.error.message || 'Inscription échouée')
+            setLoading(false)
+            return
+          }
+          if (res.needsEmailVerification) {
+            setFillFiledMessage('Compte créé ! Vérifiez votre email pour activer votre compte.')
+            setLoading(false)
+            return
+          }
+        } else {
+          res = await nhost.auth.signIn({ email, password })
         }
-        
+
         if (res.session?.user) {
           const user = res.session.user
           const mappedUser = {
@@ -58,20 +70,20 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
           setCosmicUser(mappedUser)
           setToken(mappedUser)
 
-          setFillFiledMessage('Congrats!')
+          setFillFiledMessage('Connexion réussie !')
           handleOAuth(mappedUser)
           setFields(registerFields)
-          
+
           if (redirectToSubscription) {
             push('/subscription')
           } else {
             handleClose()
           }
         } else {
-          setFillFiledMessage(res.error?.message || 'Authentication failed')
+          setFillFiledMessage(res.error?.message || 'Identifiants incorrects')
         }
       } else {
-        setFillFiledMessage('Please fill all fields')
+        setFillFiledMessage('Veuillez remplir tous les champs')
       }
       setLoading(false)
     },
@@ -79,6 +91,7 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
       fillFiledMessage?.length,
       email,
       password,
+      mode,
       setCosmicUser,
       handleOAuth,
       handleClose,
@@ -87,13 +100,20 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
     ]
   )
 
+  const toggleMode = () => {
+    setMode(prev => (prev === 'login' ? 'register' : 'login'))
+    setFillFiledMessage('')
+  }
+
   return (
     <div className={cn(className, styles.transfer)}>
       <div className={cn('h4', styles.title)}>
-        Authentication with Nhost
+        {mode === 'login' ? 'Connexion' : 'Inscription'}
       </div>
       <div className={styles.text}>
-        To create an item you need to register or log in.
+        {mode === 'login'
+          ? 'Connectez-vous à votre compte pour accéder au catalogue.'
+          : 'Créez un compte pour télécharger des scripts et applications.'}
       </div>
       <div className={styles.error}>{fillFiledMessage}</div>
       <form className={styles.form} action="submit" onSubmit={submitForm}>
@@ -114,7 +134,7 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
             className={styles.input}
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Mot de passe"
             onChange={handleChange}
             value={password}
             required
@@ -122,16 +142,33 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
         </div>
         <div className={styles.btns}>
           <button type="submit" className={cn('button', styles.button)}>
-            {loading ? <Loader /> : 'Continue'}
+            {loading ? <Loader /> : mode === 'login' ? 'Se connecter' : "S'inscrire"}
           </button>
           <button
             onClick={disable ? handleGoHome : handleClose}
             className={cn('button-stroke', styles.button)}
           >
-            {disable ? 'Return Home Page' : 'Cancel'}
+            {disable ? 'Retour à l\'accueil' : 'Annuler'}
           </button>
         </div>
       </form>
+      <div className={styles.toggle}>
+        {mode === 'login' ? (
+          <span>
+            Pas encore de compte ?{' '}
+            <button type="button" className={styles.toggleBtn} onClick={toggleMode}>
+              S&apos;inscrire
+            </button>
+          </span>
+        ) : (
+          <span>
+            Déjà un compte ?{' '}
+            <button type="button" className={styles.toggleBtn} onClick={toggleMode}>
+              Se connecter
+            </button>
+          </span>
+        )}
+      </div>
     </div>
   )
 }

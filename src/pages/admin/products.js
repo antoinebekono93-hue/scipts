@@ -35,6 +35,26 @@ const AdminProducts = ({ navigationItems, categories }) => {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [authed, setAuthed] = useState(false)
+
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuth')
+    if (!adminAuth) {
+      window.location.href = '/admin/login'
+      return
+    }
+    try {
+      const parsed = JSON.parse(adminAuth)
+      if (!parsed.userId) {
+        window.location.href = '/admin/login'
+        return
+      }
+    } catch {
+      window.location.href = '/admin/login'
+      return
+    }
+    setAuthed(true)
+  }, [])
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
@@ -215,6 +235,8 @@ const AdminProducts = ({ navigationItems, categories }) => {
   const filteredProducts = products.filter(p =>
     p.title?.toLowerCase().includes(search.toLowerCase())
   )
+
+  if (!authed) return null
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
