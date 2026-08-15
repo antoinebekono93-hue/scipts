@@ -62,7 +62,7 @@ const AdminLogin = () => {
 
   return (
     <>
-      <PageMeta title="Admin - Connexion" />
+      <PageMeta title="Admin - Connexion" noindex />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>
           <div className={styles.form}>

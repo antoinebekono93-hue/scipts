@@ -22,10 +22,11 @@ const AboutUs = ({ navigationItems, landing }) => {
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <PageMeta
-        title={'About | Script Marketplace'}
+        title="À propos — Script Marketplace | Scripts PHP, WordPress et WHMCS"
         description={
-          'Marketplace built with Nhost, Next.js, and Flutterwave'
+          'Script Marketplace est une plateforme de scripts PHP, plugins WordPress, modules WHMCS et applications web premium. Accédez à tout le catalogue avec un abonnement simple : 10$/3 mois ou 16$/an.'
         }
+        path="/about"
       />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>

@@ -15,6 +15,8 @@ import chooseBySlug from '../utils/chooseBySlug'
 import { getDataByCategory, getAllDataByType } from '../lib/nhost'
 
 import styles from '../styles/pages/Search.module.sass'
+import { PageMeta, JsonLd } from '../components/Meta'
+import { buildItemListJsonLd, DEFAULT_DESCRIPTION } from '../lib/seo'
 
 const Home = ({
   reviews,
@@ -25,6 +27,11 @@ const Home = ({
 }) => {
   const { categories, onCategoriesChange, setNavigation, cosmicUser, hasActiveSubscription } = useStateContext()
   const { push } = useRouter()
+
+  const featuredProducts = Object.values(categoriesGroup?.groups || {})
+    .flatMap(group => group)
+    .slice(0, 12)
+  const homeJsonLd = buildItemListJsonLd(featuredProducts, '/')
 
   const handleContextAdd = useCallback(
     (category, data, navigation) => {
@@ -60,6 +67,12 @@ const Home = ({
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
+      <PageMeta
+        title="Script Marketplace — Scripts PHP, plugins WordPress, WHMCS et applications premium"
+        description={DEFAULT_DESCRIPTION}
+        path="/"
+      />
+      <JsonLd data={homeJsonLd} />
       <Description info={chooseBySlug(landing, 'marketing')} />
       <HotBid classSection="section" info={categoriesGroup['groups'][0]} />
       <Categories

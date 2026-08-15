@@ -139,6 +139,7 @@ const Subscription = ({ navigationItems }) => {
       <PageMeta
         title={'Nos Abonnements | Script Marketplace'}
         description={'Débloquez tout le catalogue Premium : scripts PHP, plugins WordPress, templates. 10$/trimestre ou 16$/an.'}
+        path="/subscription"
       />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>

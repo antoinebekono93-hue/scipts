@@ -172,10 +172,11 @@ const Upload = ({ navigationItems, categoriesType }) => {
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata || navigation}>
       <PageMeta
-        title={'Create Item | Script Marketplace'}
+        title="Soumettre un produit | Script Marketplace"
         description={
-          'Marketplace built with Nhost, Next.js, and Flutterwave'
+          'Publiez vos scripts PHP, plugins WordPress, modules WHMCS et applications sur Script Marketplace.'
         }
+        path="/upload-details"
       />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>

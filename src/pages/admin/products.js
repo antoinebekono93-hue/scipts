@@ -286,6 +286,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
       <PageMeta
         title={'Admin Produits | Script Marketplace'}
         description={'Gestion des produits'}
+        noindex
       />
       <div className={cn('section-pt80', styles.section)}>
         <div className={cn('container', styles.container)}>

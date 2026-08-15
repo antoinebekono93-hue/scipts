@@ -15,9 +15,14 @@ import handleQueryParams from '../utils/queryParams'
 import { OPTIONS } from '../utils/constants/appConstants'
 
 import styles from '../styles/pages/Search.module.sass'
-import { PageMeta } from '../components/Meta'
+import { PageMeta, JsonLd } from '../components/Meta'
+import {
+  buildCategoryJsonLd,
+  buildItemListJsonLd,
+  truncate,
+} from '../lib/seo'
 
-const Search = ({ categoriesGroup, navigationItems, categoryData }) => {
+const Search = ({ categoriesGroup, navigationItems, categoryData, categoryTypes }) => {
   const { query, push } = useRouter()
   const { categories } = useStateContext()
 
@@ -26,6 +31,22 @@ const Search = ({ categoriesGroup, navigationItems, categoryData }) => {
   )
 
   const categoriesTypeData = categoriesGroup['type'] || categories['type']
+
+  const activeCategory = categoryTypes?.find(
+    c => c.slug === (query['category'] || '') || c.id === (query['category'] || '')
+  )
+  const pageTitle = activeCategory
+    ? `${activeCategory.title} — Scripts et templates premium | Script Marketplace`
+    : 'Rechercher — Scripts PHP, plugins WordPress, WHMCS | Script Marketplace'
+  const pageDescription = activeCategory
+    ? `Découvrez et téléchargez les scripts ${activeCategory.title} premium du catalogue Script Marketplace : PHP, WordPress, WHMCS et applications web.`
+    : 'Recherchez parmi des milliers de scripts PHP, plugins WordPress, modules WHMCS et applications web premium sur Script Marketplace.'
+  const canonicalPath = activeCategory
+    ? `/search?category=${activeCategory.slug}`
+    : '/search'
+  const pageJsonLd = activeCategory
+    ? buildCategoryJsonLd(activeCategory, searchResult, canonicalPath)
+    : buildItemListJsonLd(searchResult, canonicalPath)
 
   const [search, setSearch] = useState(query['search'] || '')
   const debouncedSearchTerm = useDebounce(search, 600)
@@ -142,11 +163,11 @@ const Search = ({ categoriesGroup, navigationItems, categoryData }) => {
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
       <PageMeta
-        title={'Discover | Script Marketplace'}
-        description={
-          'Marketplace built with Nhost, Next.js, and Flutterwave'
-        }
+        title={pageTitle}
+        description={pageDescription}
+        path={canonicalPath}
       />
+      <JsonLd data={pageJsonLd} />
       <div className={cn('section-pt80', styles.section)}>
         <div className={cn('container', styles.container)}>
           <div className={styles.row}>
@@ -278,6 +299,6 @@ export async function getServerSideProps({ query }) {
   const categoriesGroup = { groups: categoriesGroups, type: categoriesType }
 
   return {
-    props: { navigationItems, categoriesGroup, categoryData },
+    props: { navigationItems, categoriesGroup, categoryData, categoryTypes },
   }
 }

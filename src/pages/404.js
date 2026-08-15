@@ -4,6 +4,7 @@ import cn from 'classnames'
 import Layout from '../components/Layout'
 import Image from '../components/Image'
 import { getAllDataByType } from '../lib/nhost'
+import { PageMeta } from '../components/Meta'
 
 import styles from '../styles/pages/NotFound.module.sass'
 
@@ -16,6 +17,12 @@ const NotFound = ({ navigationItems }) => {
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
+      <PageMeta
+        title="Page introuvable | Script Marketplace"
+        description="La page que vous recherchez n'existe pas ou a été déplacée."
+        path="/404"
+        noindex
+      />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>
           <div className={styles.wrap}>

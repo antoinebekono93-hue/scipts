@@ -17,6 +17,13 @@ import {
   getDataByCategory,
 } from '../../lib/nhost'
 import getStripe from '../../lib/getStripe'
+import { PageMeta, JsonLd } from '../../components/Meta'
+import {
+  buildProductJsonLd,
+  buildBreadcrumbJsonLd,
+  productImageUrl,
+  truncate,
+} from '../../lib/seo'
 
 import styles from '../../styles/pages/Item.module.sass'
 
@@ -28,6 +35,25 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
   const [activeImage, setActiveImage] = useState(0)
   const [visibleAuthModal, setVisibleAuthModal] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
+
+  const product = itemInfo?.[0]
+  const categoryTitle = product?.category_id
+    ? categoriesGroup?.type?.[product.category_id] || null
+    : null
+
+  const pageTitle = product
+    ? `${product.title} — Scripts et applications | Script Marketplace`
+    : 'Produit | Script Marketplace'
+  const pageDescription = product
+    ? truncate(product.description || product.metadata?.description)
+    : 'Découvrez ce produit du catalogue Script Marketplace.'
+  const pageImage = product ? productImageUrl(product) : null
+  const productJsonLd = product ? buildProductJsonLd(product) : null
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: 'Accueil', path: '/' },
+    ...(categoryTitle ? [{ name: categoryTitle, path: `/search?category=${product.category_id}` }] : []),
+    { name: product?.title || 'Produit', path: `/item/${product?.slug}` },
+  ])
 
   useEffect(() => {
     async function checkSub() {
@@ -141,6 +167,14 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
 
   return (
     <Layout navigationPaths={navigationItems[0]?.metadata}>
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        image={pageImage}
+        path={`/item/${product?.slug || ''}`}
+        type="product"
+      />
+      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <div className={cn('section', styles.section)}>
         <div className={cn('container', styles.container)}>
           <div className={styles.bg}>

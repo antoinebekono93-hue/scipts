@@ -31,10 +31,11 @@ const Layout = ({ children, title, navigationPaths }) => {
     <>
       <Meta />
       <PageMeta
-        title={'Script Marketplace'}
+        title={'Script Marketplace — Scripts PHP, plugins WordPress, WHMCS et applications premium'}
         description={
-          'Marketplace built with Nhost, Next.js, and Flutterwave'
+          'Téléchargez des scripts PHP, plugins WordPress, modules WHMCS et applications web premium avec un abonnement simple : 10$/3 mois ou 16$/an.'
         }
+        path="/"
       />
       <div className={styles.github}>
         <p className={styles.source}>
