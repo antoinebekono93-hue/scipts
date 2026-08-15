@@ -234,8 +234,15 @@ function esc(str) {
 }
 
 function buildProducts(categorySlug, products) {
+  const usedSlugs = new Set()
   return products.map(([title, description, price, count, color, demo_url, sales, rating, version]) => {
-    const slug = slugify(title)
+    let slug = slugify(title)
+    if (usedSlugs.has(slug)) {
+      let n = 2
+      while (usedSlugs.has(`${slug}-${n}`)) n++
+      slug = `${slug}-${n}`
+    }
+    usedSlugs.add(slug)
     const metadata = JSON.stringify({
       demo_url,
       is_premium: true,

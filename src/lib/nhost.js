@@ -90,6 +90,7 @@ export async function getAllDataByType(dataType = 'categories') {
 }
 
 export async function getDataByCategory(id) {
+  const categoryId = await resolveCategoryId(id)
   const { data, error } = await nhost.graphql.request(`
     query GetProductsByCategory($categoryId: uuid!) {
       products(where: { category_id: { _eq: $categoryId } }) {
@@ -155,7 +156,6 @@ export async function getDataByCategory(id) {
     }
   }))
 }
-
 export async function getDataBySlug(slug) {
   const { data, error } = await nhost.graphql.request(`
     query GetProductBySlug($slug: String!) {
@@ -204,4 +204,22 @@ export async function getDataBySlug(slug) {
       }
     }
   }))
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export async function resolveCategoryId(idOrSlug) {
+  if (!idOrSlug) return idOrSlug
+  if (UUID_REGEX.test(idOrSlug)) return idOrSlug
+
+  const { data, error } = await nhost.graphql.request(`
+    query ResolveCategory($slug: String!) {
+      categories(where: { slug: { _eq: $slug } }, limit: 1) {
+        id
+      }
+    }
+  `, { slug: idOrSlug })
+
+  if (error || !data?.categories?.length) return null
+  return data.categories[0].id
 }

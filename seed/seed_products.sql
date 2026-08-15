@@ -1,7 +1,7 @@
 -- ============================================================
 -- SEED: 200 produits premium ThemeForest/Codecanyon
 -- Catégories: wordpress (50), whmcs (50), scripts (50), applications (50)
--- Généré le 2026-08-14T01:22:55.789Z
+-- Généré le 2026-08-15T00:06:43.797Z
 -- Exécuter dans Hasura Console > Data > SQL
 -- ============================================================
 
@@ -92,7 +92,7 @@ WHERE c.slug = 'wordpress';
 
 -- Betheme
 INSERT INTO public.products (title, slug, description, price, count, color, category_id, image_id, is_premium, file_url, metadata)
-SELECT 'Betheme', 'betheme', 'Thème WordPress avec 700+ pré-fabriqués', 59, 3.4, '#d35400', c.id, NULL, true, NULL, '{"demo_url":"https://themes.muffingroup.com/be/creator/","is_premium":true,"sales":240000,"rating":4.6,"version":"27.3.2","last_updated":"2026-01-15","tags":["wordpress","premium","betheme"]}'::jsonb
+SELECT 'Betheme', 'betheme-2', 'Thème WordPress avec 700+ pré-fabriqués', 59, 3.4, '#d35400', c.id, NULL, true, NULL, '{"demo_url":"https://themes.muffingroup.com/be/creator/","is_premium":true,"sales":240000,"rating":4.6,"version":"27.3.2","last_updated":"2026-01-15","tags":["wordpress","premium","betheme"]}'::jsonb
 FROM public.categories c
 WHERE c.slug = 'wordpress';
 

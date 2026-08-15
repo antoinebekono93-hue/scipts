@@ -1,4 +1,4 @@
-import { nhost } from '../../lib/nhost'
+import { nhost, resolveCategoryId } from '../../lib/nhost'
 import rateLimit from '../../utils/rateLimit'
 
 export default async function filterHandler(req, res) {
@@ -29,7 +29,10 @@ export default async function filterHandler(req, res) {
   }
 
   if (typeof category !== 'undefined' && category !== 'undefined') {
-    where.category_id = { _eq: category }
+    const categoryId = await resolveCategoryId(category)
+    if (categoryId) {
+      where.category_id = { _eq: categoryId }
+    }
   }
 
   if (search && typeof search !== 'undefined' && search !== 'undefined') {
