@@ -46,7 +46,10 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
         let res
         if (mode === 'register') {
           res = await nhost.auth.signUp({ email, password })
-          if (res.error) {
+          if (res.error && res.error.message?.includes('already')) {
+            res = await nhost.auth.signIn({ email, password })
+          }
+          if (res.error && !res.error.message?.includes('already')) {
             setFillFiledMessage(res.error.message || 'Inscription échouée')
             setLoading(false)
             return
