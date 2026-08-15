@@ -36,6 +36,10 @@ const AdminProducts = ({ navigationItems, categories }) => {
   const [search, setSearch] = useState('')
   const [uploading, setUploading] = useState(false)
   const [authed, setAuthed] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importFile, setImportFile] = useState(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState(null)
 
   useEffect(() => {
     const adminAuth = localStorage.getItem('adminAuth')
@@ -232,6 +236,45 @@ const AdminProducts = ({ navigationItems, categories }) => {
   const getCategoryTitle = id =>
     categories?.find(c => c.id === id)?.title || '—'
 
+  const downloadTemplate = () => {
+    const template = `titre,description,prix,quantite,couleur,categorie,premium,file_url,demo_url,image_url\n"Mon Super Script","Description du produit",19.99,5,#3498db,Scripts,true,https://example.com/script.zip,https://demo.example.com,https://example.com/image.png\n`
+    const blob = new Blob([`\uFEFF${template}`], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'modele-produits.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImportSubmit = async e => {
+    e.preventDefault()
+    if (!importFile) {
+      toast.error('Sélectionnez un fichier CSV')
+      return
+    }
+    setImporting(true)
+    setImportResult(null)
+    try {
+      const formData = new FormData()
+      formData.append('csv', importFile)
+      const res = await fetch('/api/admin/import', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (res.ok) {
+        setImportResult(data)
+        if (data.imported > 0) fetchProducts()
+        toast.success(`${data.imported} produit(s) importé(s)`)
+      } else {
+        toast.error(data.message || 'Erreur lors de l\'import')
+        setImportResult({ error: data.message })
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Erreur réseau')
+    }
+    setImporting(false)
+  }
+
   const filteredProducts = products.filter(p =>
     p.title?.toLowerCase().includes(search.toLowerCase())
   )
@@ -246,9 +289,84 @@ const AdminProducts = ({ navigationItems, categories }) => {
       />
       <div className={cn('section-pt80', styles.section)}>
         <div className={cn('container', styles.container)}>
-          <h1 className={cn('h3', styles.title)}>
-            Admin - Gestion des Produits ({products.length})
-          </h1>
+          <div className={styles.row} style={{ marginBottom: 24 }}>
+            <h1 className={cn('h3', styles.title)} style={{ marginBottom: 0 }}>
+              Admin - Gestion des Produits ({products.length})
+            </h1>
+            <div className={styles.btns}>
+              <button
+                type="button"
+                className={cn('button-stroke', styles.btn)}
+                onClick={() => setImportOpen(prev => !prev)}
+              >
+                {importOpen ? 'Fermer l\'import' : 'Importer CSV'}
+              </button>
+              {importOpen && (
+                <button
+                  type="button"
+                  className={cn('button-stroke', styles.btn)}
+                  onClick={downloadTemplate}
+                >
+                  Télécharger le modèle
+                </button>
+              )}
+            </div>
+          </div>
+
+          {importOpen && (
+            <div className={styles.importSection}>
+              <h2 className={styles.subtitle}>Import en masse (CSV)</h2>
+              <form onSubmit={handleImportSubmit} className={styles.importForm}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Fichier CSV *</label>
+                  <input
+                    className={styles.input}
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={e => {
+                      setImportFile(e.target.files[0] || null)
+                      setImportResult(null)
+                    }}
+                  />
+                </div>
+                <div className={styles.btns} style={{ marginTop: 16 }}>
+                  <button type="submit" className={cn('button', styles.btn)} disabled={importing}>
+                    {importing ? 'Import en cours...' : 'Importer'}
+                  </button>
+                </div>
+              </form>
+              <p className={styles.hint} style={{ marginTop: 16 }}>
+                Colonnes : <b>titre*</b>, description, prix, quantite, couleur,{' '}
+                <b>categorie*</b> (nom ou slug), premium, file_url, demo_url, image_url.
+                Les images sont téléchargées depuis leurs URLs et uploadées automatiquement.
+                Séparez plusieurs images par <b>|</b> (la 1ère devient la couverture).
+              </p>
+              {importResult?.error && (
+                <p className={styles.importError} style={{ color: '#e74c3c' }}>
+                  {importResult.error}
+                </p>
+              )}
+              {importResult?.total !== undefined && (
+                <div className={styles.importResult}>
+                  <p>
+                    <b>{importResult.imported}</b> importé(s) / <b>{importResult.failed}</b>{' '}
+                    en échec (total : {importResult.total})
+                  </p>
+                  {importResult.failed > 0 && (
+                    <ul className={styles.importErrors}>
+                      {importResult.results
+                        .filter(r => !r.ok)
+                        .map((r, i) => (
+                          <li key={i}>
+                            Ligne {r.row} — {r.title} : {r.error}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <h2 className={styles.subtitle}>
