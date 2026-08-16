@@ -229,58 +229,6 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                   : 'Not Available'}
               </div>
             </div>
-            <div className={styles.info}>
-              {itemInfo[0]?.metadata?.description}
-            </div>
-            <div className={styles.nav}>
-              {itemInfo[0]?.metadata?.categories?.map((x, index) => (
-                <button
-                  className={cn(
-                    { [styles.active]: index === activeIndex },
-                    styles.link
-                  )}
-                  onClick={() => setActiveIndex(index)}
-                  key={index}
-                >
-                  {x?.title}
-                </button>
-              ))}
-            </div>
-            <div className={styles.actions}>
-              <div className={styles.btns}>
-                {(!itemInfo[0]?.metadata?.is_premium || isSubscribed) ? (
-                  <button
-                    className={cn('button', styles.button)}
-                    onClick={() => {
-                      if (!cosmicUser?.id) {
-                        handleOAuth()
-                      } else {
-                        handleDownload()
-                      }
-                    }}
-                  >
-                    Télécharger le Fichier
-                  </button>
-                ) : (
-                  <button
-                    className={cn('button', styles.button)}
-                    onClick={() => push('/subscription')}
-                  >
-                    Débloquer Premium (10$/3 mois ou 16$/an)
-                  </button>
-                )}
-                {itemInfo[0]?.metadata?.demo_url && (
-                  <button
-                    className={cn('button-stroke', styles.button)}
-                    onClick={() =>
-                      window.open(itemInfo[0]?.metadata?.demo_url, '_blank')
-                    }
-                  >
-                    Voir la Démo
-                  </button>
-                )}
-              </div>
-            </div>
             <div className={styles.productInfo}>
               <div className={styles.productInfoRow}>
                 <span className={styles.productInfoLabel}>Auteur</span>
@@ -334,8 +282,53 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                 </span>
               </div>
             </div>
+            <div className={styles.actions}>
+              <div className={styles.btns}>
+                {(!itemInfo[0]?.metadata?.is_premium || isSubscribed) ? (
+                  <button
+                    className={cn('button', styles.button)}
+                    onClick={() => {
+                      if (!cosmicUser?.id) {
+                        handleOAuth()
+                      } else {
+                        handleDownload()
+                      }
+                    }}
+                  >
+                    Télécharger le Fichier
+                  </button>
+                ) : (
+                  <button
+                    className={cn('button', styles.button)}
+                    onClick={() => push('/subscription')}
+                  >
+                    Débloquer Premium (10$/3 mois ou 16$/an)
+                  </button>
+                )}
+                {itemInfo[0]?.metadata?.demo_url && (
+                  <button
+                    className={cn('button-stroke', styles.button)}
+                    onClick={() =>
+                      window.open(itemInfo[0]?.metadata?.demo_url, '_blank')
+                    }
+                  >
+                    Voir la Démo
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
+        {itemInfo[0]?.metadata?.description && (
+          <div className={cn('container', styles.container)}>
+            <div className={styles.description}>
+              <h2 className={cn('h3', styles.descTitle)}>Description</h2>
+              <div className={styles.descContent}>
+                {itemInfo[0]?.metadata?.description}
+              </div>
+            </div>
+          </div>
+        )}
         <HotBid classSection="section" info={categoriesGroup['groups'][0]} />
         <Discover
           info={categoriesGroup['groups']}
