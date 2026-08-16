@@ -5,6 +5,11 @@ export const nhost = new NhostClient({
   region: process.env.NEXT_PUBLIC_NHOST_REGION || 'us-east-1'
 })
 
+export function getStorageUrl(fileId) {
+  if (!fileId) return null
+  return `/api/image/${fileId}`
+}
+
 export async function getAllDataByType(dataType = 'categories') {
   if (dataType === 'landings') {
     return [
@@ -89,7 +94,7 @@ function buildGallery(p) {
   const extra = Array.isArray(p.metadata?.gallery) ? p.metadata.gallery : []
   const gallery = [
     ...(p.image_id
-      ? [{ id: p.image_id, url: nhost.storage.getPublicUrl({ fileId: p.image_id }) }]
+      ? [{ id: p.image_id, url: getStorageUrl(p.image_id) }]
       : []),
     ...extra,
   ]
@@ -116,7 +121,7 @@ function formatProduct(p) {
       gallery: buildGallery(p),
       image: {
         imgix_url: p.image_id
-          ? nhost.storage.getPublicUrl({ fileId: p.image_id })
+          ? getStorageUrl(p.image_id)
           : getPlaceholderImage(p.title)
       }
     }

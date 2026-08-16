@@ -138,7 +138,7 @@ async function uploadImage(req, res) {
 
       return res.status(200).json({
         file_id: fileMetadata.id,
-        public_url: nhost.storage.getPublicUrl({ fileId: fileMetadata.id })
+        public_url: `/api/image/${fileMetadata.id}`
       })
     } catch (err) {
       console.error('Upload error:', err)

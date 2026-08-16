@@ -86,7 +86,7 @@ export default async function filterHandler(req, res) {
         categories: [p.category_id],
         image: {
           imgix_url: p.image_id
-            ? nhost.storage.getPublicUrl({ fileId: p.image_id })
+            ? `/api/image/${p.image_id}`
             : getPlaceholderImage(p.title)
         }
       }

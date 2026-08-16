@@ -25,8 +25,7 @@ const emptyForm = {
   watermark: true,
 }
 
-const fileUrl = id =>
-  `https://${process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'dspprxgtnymanbtxneyo'}.${process.env.NEXT_PUBLIC_NHOST_REGION || 'us-east-1'}.nhost.run/v1/files/${id}`
+const fileUrl = id => `/api/image/${id}`
 
 const AdminProducts = ({ navigationItems, categories }) => {
   const { cosmicUser } = useStateContext()

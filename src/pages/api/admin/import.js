@@ -132,7 +132,7 @@ async function downloadAndUploadImage(url, index) {
     )
 
     if (error || !fileMetadata) return { error: 'storage upload failed' }
-    return { id: fileMetadata.id, url: nhost.storage.getPublicUrl({ fileId: fileMetadata.id }) }
+    return { id: fileMetadata.id, url: `/api/image/${fileMetadata.id}` }
   } catch (err) {
     return { error: err.message || 'download failed' }
   }
