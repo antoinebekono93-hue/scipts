@@ -159,6 +159,54 @@
 .textarea
     resize: vertical
 
+.editor
+    border-radius: 12px
+    overflow: hidden
+    border: 2px solid $neutrals6
+    +dark
+        border-color: $neutrals3
+    .ql-toolbar
+        border: none
+        border-bottom: 1px solid $neutrals6
+        background: $neutrals7
+        +dark
+            border-color: $neutrals3
+            background: $neutrals1
+    .ql-container
+        border: none
+        font-family: inherit
+        font-size: 14px
+        color: $neutrals2
+        min-height: 180px
+        +dark
+            color: $neutrals8
+    .ql-editor
+        min-height: 180px
+        padding: 14px
+        &.ql-blank::before
+            color: $neutrals5
+            font-style: normal
+    .ql-stroke
+        stroke: $neutrals4
+        +dark
+            stroke: $neutrals6
+    .ql-fill
+        fill: $neutrals4
+        +dark
+            fill: $neutrals6
+    .ql-picker-label
+        color: $neutrals4
+        +dark
+            color: $neutrals6
+    .ql-active
+        .ql-stroke
+            stroke: $purple
+        .ql-fill
+            fill: $purple
+    img
+        max-width: 100%
+        border-radius: 8px
+
 .row
     display: flex
     align-items: center

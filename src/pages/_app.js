@@ -2,6 +2,7 @@ import { Toaster } from 'react-hot-toast'
 import { StateContext } from '../utils/context/StateContext'
 
 import '../styles/app.sass'
+import 'react-quill/dist/quill.snow.css'
 
 import { NhostProvider } from '@nhost/nextjs'
 import { nhost } from '../lib/nhost'

@@ -3,6 +3,7 @@ import cn from 'classnames'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import Layout from '../../components/Layout'
+import RichTextEditor from '../../components/RichTextEditor'
 import { useStateContext } from '../../utils/context/StateContext'
 import { getAllDataByType } from '../../lib/nhost'
 import { processImage } from '../../utils/imageProcessor'
@@ -529,14 +530,12 @@ const AdminProducts = ({ navigationItems, categories }) => {
               </div>
               <div className={cn(styles.field, styles.fieldFull)}>
                 <label className={styles.label}>Description</label>
-                <textarea
-                  className={styles.textarea}
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Description du produit..."
-                />
+                <div className={styles.editor}>
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={val => setForm(prev => ({ ...prev, description: val }))}
+                  />
+                </div>
               </div>
             </div>
             <div className={styles.row}>

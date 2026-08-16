@@ -329,9 +329,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
           <div className={cn('container', styles.container)}>
             <div className={styles.description}>
               <h2 className={cn('h3', styles.descTitle)}>Description</h2>
-              <div className={styles.descContent}>
-                {itemInfo[0]?.metadata?.description}
-              </div>
+              <div className={styles.descContent} dangerouslySetInnerHTML={{ __html: itemInfo[0]?.metadata?.description || '' }} />
             </div>
           </div>
         )}
