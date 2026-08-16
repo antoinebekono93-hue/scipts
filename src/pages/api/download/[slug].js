@@ -160,11 +160,8 @@ export default async function handler(req, res) {
   }
 
   if (fileUrl) {
-    const streamed = await streamFile(fileUrl, res, product.title)
-    if (!streamed) {
-      return res.status(502).json({ message: 'Fichier inaccessible' })
-    }
-    return
+    // Lien externe (fichier hébergé ailleurs) : on renvoie l'URL pour ouverture directe
+    return res.status(200).json({ externalUrl: fileUrl })
   }
 
   return res.status(404).json({ message: 'Aucun fichier disponible' })

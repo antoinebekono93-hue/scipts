@@ -141,6 +141,17 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
         return
       }
 
+      const contentType = res.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const data = await res.json()
+        if (data?.externalUrl) {
+          window.open(data.externalUrl, '_blank')
+          return
+        }
+        toast.error('Erreur de téléchargement')
+        return
+      }
+
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')

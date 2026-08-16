@@ -10,6 +10,29 @@ const ADMIN_HEADERS = {
   'x-hasura-admin-secret': process.env.NHOST_ADMIN_SECRET || ''
 }
 
+export const config = { api: { bodyParser: false } }
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let raw = ''
+    req.on('data', chunk => {
+      raw += chunk
+      if (raw.length > 1e6) {
+        req.destroy()
+        reject(new Error('Body trop volumineux'))
+      }
+    })
+    req.on('end', () => {
+      try {
+        resolve(raw ? JSON.parse(raw) : {})
+      } catch (err) {
+        reject(err)
+      }
+    })
+    req.on('error', reject)
+  })
+}
+
 export default async function handler(req, res) {
   if (!process.env.NHOST_ADMIN_SECRET) {
     return res.status(503).json({
@@ -23,12 +46,15 @@ export default async function handler(req, res) {
     if (req.query.upload === 'true') {
       return uploadImage(req, res)
     }
+    req.body = await readJsonBody(req).catch(() => ({}))
     return createProduct(req, res)
   }
   if (req.method === 'PUT') {
+    req.body = await readJsonBody(req).catch(() => ({}))
     return updateProduct(req, res)
   }
   if (req.method === 'DELETE') {
+    req.body = await readJsonBody(req).catch(() => ({}))
     return deleteProduct(req, res)
   }
   return res.status(405).json({ message: 'Method Not Allowed' })
