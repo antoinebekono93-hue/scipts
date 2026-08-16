@@ -281,6 +281,59 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                 )}
               </div>
             </div>
+            <div className={styles.productInfo}>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Auteur</span>
+                <span className={styles.productInfoValue}>
+                  {itemInfo[0]?.metadata?.author || 'Script Marketplace'}
+                </span>
+              </div>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Téléchargements</span>
+                <span className={styles.productInfoValue}>
+                  {(itemInfo[0]?.metadata?.downloads || 0).toLocaleString('fr-FR')}
+                </span>
+              </div>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Vues</span>
+                <span className={styles.productInfoValue}>
+                  {(itemInfo[0]?.metadata?.views || 0).toLocaleString('fr-FR')}
+                </span>
+              </div>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Première sortie</span>
+                <span className={styles.productInfoValue}>
+                  {itemInfo[0]?.metadata?.first_release || '—'}
+                </span>
+              </div>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Dernière mise à jour</span>
+                <span className={styles.productInfoValue}>
+                  {itemInfo[0]?.metadata?.last_update || '—'}
+                </span>
+              </div>
+              <div className={styles.productInfoRow}>
+                <span className={styles.productInfoLabel}>Note</span>
+                <span className={styles.productInfoValue}>
+                  <span className={styles.stars}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <span
+                        key={star}
+                        className={cn(
+                          styles.star,
+                          star <= (itemInfo[0]?.metadata?.rating || 0) && styles.starFilled
+                        )}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </span>
+                  <span className={styles.ratingCount}>
+                    {itemInfo[0]?.metadata?.rating_count || 0} avis
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
         <HotBid classSection="section" info={categoriesGroup['groups'][0]} />

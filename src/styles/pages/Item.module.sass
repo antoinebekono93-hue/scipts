@@ -192,3 +192,51 @@
     margin-top: 40px
     +m
         margin-top: 32px
+
+.productInfo
+    margin-top: 32px
+    padding: 24px
+    border-radius: 16px
+    background: $neutrals2
+    +dark
+        background: $neutrals3
+
+.productInfoRow
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: 12px 0
+    &:not(:last-child)
+        border-bottom: 1px solid $neutrals4
+        +dark
+            border-color: $neutrals5
+
+.productInfoLabel
+    +body-2
+    color: $neutrals4
+
+.productInfoValue
+    +dm-sans
+    font-size: 14px
+    font-weight: 500
+    color: $neutrals8
+    +dark
+        color: $neutrals8
+    display: flex
+    align-items: center
+    gap: 8px
+
+.stars
+    display: flex
+    gap: 2px
+
+.star
+    color: $neutrals5
+    font-size: 16px
+    &.starFilled
+        color: #f5a623
+
+.ratingCount
+    color: $neutrals4
+    font-size: 13px
+    font-weight: 400
