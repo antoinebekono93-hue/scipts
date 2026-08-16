@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3'
 import toast from 'react-hot-toast'
 import Layout from '../components/Layout'
+import Modal from '../components/Modal'
+import OAuth from '../components/OAuth'
 import { useStateContext } from '../utils/context/StateContext'
 import { getAllDataByType, nhost } from '../lib/nhost'
 import { PageMeta } from '../components/Meta'
@@ -16,6 +18,8 @@ const Subscription = ({ navigationItems }) => {
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [openFaq, setOpenFaq] = useState(0)
+  const [visibleAuthModal, setVisibleAuthModal] = useState(false)
+  const pendingPlanRef = useRef(null)
 
   useEffect(() => {
     if (cosmicUser?.id) {
@@ -37,7 +41,7 @@ const Subscription = ({ navigationItems }) => {
       title: `Abonnement ${selectedPlan?.name}`,
       description: selectedPlan?.type === 'quarterly'
         ? 'Accès Premium 3 mois - Renouvellement automatique'
-        : 'Accès Premium 1 an - Renouvellement automatique - Économisez 47%',
+        : 'Accès Premium 1 an - Renouvellement automatique - Économisez 61%',
       logo: 'https://scipts.vercel.app/logo.png',
     },
     meta: {
@@ -46,24 +50,15 @@ const Subscription = ({ navigationItems }) => {
     }
   }
 
-  const handleFlutterPayment = useFlutterwave(config)
+  const handleFlutterPaymentRef = useRef()
+  handleFlutterPaymentRef.current = useFlutterwave(config)
 
-  const handlePayment = (plan) => {
-    if (!cosmicUser?.id) {
-      toast.error('Veuillez vous connecter pour vous abonner.')
-      return
-    }
-
-    if (plan.price === 0) {
-      push('/search')
-      return
-    }
-
+  const startPayment = (plan) => {
     setSelectedPlan(plan)
 
     setTimeout(() => {
       setLoading(true)
-      handleFlutterPayment({
+      handleFlutterPaymentRef.current({
         callback: async (response) => {
            if (response.status === "successful") {
              toast.success("Paiement réussi ! Activation en cours...")
@@ -88,16 +83,48 @@ const Subscription = ({ navigationItems }) => {
              } catch (err) {
                console.error(err)
              }
-          }
-          closePaymentModal()
-          setLoading(false)
-        },
+         }
+         closePaymentModal()
+         setLoading(false)
+       },
         onClose: () => {
           setLoading(false)
         },
       })
     }, 100)
   }
+
+  const handlePayment = (plan) => {
+    if (!cosmicUser?.id) {
+      pendingPlanRef.current = plan
+      setVisibleAuthModal(true)
+      return
+    }
+
+    if (plan.price === 0) {
+      push('/search')
+      return
+    }
+
+    startPayment(plan)
+  }
+
+  const handleAuthSuccess = useCallback(() => {
+    setVisibleAuthModal(false)
+  }, [])
+
+  const handleCloseAuthModal = useCallback(() => {
+    setVisibleAuthModal(false)
+  }, [])
+
+  useEffect(() => {
+    if (cosmicUser?.id && pendingPlanRef.current) {
+      const plan = pendingPlanRef.current
+      pendingPlanRef.current = null
+      startPayment(plan)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cosmicUser?.id])
 
   const isCurrentPlan = (planType) => {
     return hasActiveSubscription && subscriptionPlan === planType
@@ -231,6 +258,16 @@ const Subscription = ({ navigationItems }) => {
           </div>
         </div>
       </div>
+      <Modal
+        visible={visibleAuthModal}
+        onClose={handleCloseAuthModal}
+      >
+        <OAuth
+          className={styles.steps}
+          handleOAuth={handleAuthSuccess}
+          handleClose={handleCloseAuthModal}
+        />
+      </Modal>
     </Layout>
   )
 }
