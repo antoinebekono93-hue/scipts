@@ -106,19 +106,21 @@ function buildGallery(p) {
 }
 
 function formatProduct(p) {
+  const existingMeta = p.metadata || {}
   return {
     id: p.id,
     title: p.title,
     slug: p.slug,
     created_at: p.created_at,
     metadata: {
+      ...existingMeta,
       description: p.description,
       price: p.price,
       count: p.count,
       color: p.color,
       is_premium: p.is_premium,
       file_url: p.file_url,
-      demo_url: p.metadata?.demo_url || null,
+      demo_url: existingMeta.demo_url || null,
       categories: [p.category_id],
       gallery: buildGallery(p),
       image: {
