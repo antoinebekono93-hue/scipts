@@ -54,7 +54,7 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
             setLoading(false)
             return
           }
-          if (res.needsEmailVerification) {
+          if (!res.session && !res.error) {
             setFillFiledMessage('Compte créé ! Vérifiez votre email pour activer votre compte.')
             setLoading(false)
             return

@@ -6,7 +6,9 @@ import {
   useCallback,
 } from 'react'
 import { toast } from 'react-hot-toast'
+import { useAuthenticationStatus, useUserData } from '@nhost/nextjs'
 import { nhost } from '../../lib/nhost'
+import { setToken, removeToken } from '../token'
 
 const Context = createContext()
 
@@ -23,6 +25,28 @@ export const StateContext = ({ children }) => {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
   const [subscriptionPlan, setSubscriptionPlan] = useState('free')
   const [subscriptionEndDate, setSubscriptionEndDate] = useState(null)
+
+  const { isAuthenticated, isLoading } = useAuthenticationStatus()
+  const nhostUser = useUserData()
+
+  useEffect(() => {
+    if (isLoading) return
+
+    if (isAuthenticated && nhostUser?.id) {
+      const mappedUser = {
+        id: nhostUser.id,
+        first_name:
+          nhostUser.displayName || nhostUser.email?.split('@')[0] || 'User',
+        avatar_url: nhostUser.avatarUrl || null,
+        email: nhostUser.email || '',
+      }
+      setCosmicUser(mappedUser)
+      setToken(mappedUser)
+    } else if (!isAuthenticated) {
+      setCosmicUser({})
+      removeToken()
+    }
+  }, [isAuthenticated, isLoading, nhostUser])
 
   const onCategoriesChange = useCallback(content => {
     setCategories(prevFields => ({ ...prevFields, ...content }))

@@ -8,6 +8,7 @@ import styles from './User.module.sass'
 import Icon from '../../Icon'
 import { removeToken } from '../../../utils/token'
 import { useStateContext } from '../../../utils/context/StateContext'
+import { nhost } from '../../../lib/nhost'
 
 const User = ({ className, user }) => {
   const { setCosmicUser } = useStateContext()
@@ -20,6 +21,7 @@ const User = ({ className, user }) => {
       title: 'Disconnect',
       icon: 'exit',
       callback: () => {
+        nhost.auth.signOut()
         setCosmicUser({})
         push('/')
         removeToken()
