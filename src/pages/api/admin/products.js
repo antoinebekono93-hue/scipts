@@ -98,12 +98,12 @@ async function uploadImage(req, res) {
       const fs = await import('fs')
       const fileBuffer = fs.default.readFileSync(uploadedFile.filepath)
 
-      const { data, error } = await nhost.storage.upload({
+      const { fileMetadata, error } = await nhost.storage.upload({
         file: new Blob([fileBuffer]),
         name: uploadedFile.originalFilename || 'image.png'
       }, { headers: ADMIN_HEADERS })
 
-      if (error) {
+      if (error || !fileMetadata) {
         console.error('Nhost upload error:', error)
         return res.status(500).json({ message: 'Storage upload failed' })
       }
@@ -111,8 +111,8 @@ async function uploadImage(req, res) {
       fs.default.unlinkSync(uploadedFile.filepath)
 
       return res.status(200).json({
-        file_id: data.id,
-        public_url: nhost.storage.getPublicUrl({ fileId: data.id })
+        file_id: fileMetadata.id,
+        public_url: nhost.storage.getPublicUrl({ fileId: fileMetadata.id })
       })
     } catch (err) {
       console.error('Upload error:', err)

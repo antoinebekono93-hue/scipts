@@ -126,13 +126,13 @@ async function downloadAndUploadImage(url, index) {
     if (buffer.length > MAX_IMAGE_SIZE) return { error: 'image > 10MB' }
 
     const name = `import-${index}-${Date.now()}${getExtension(response.headers.get('content-type'))}`
-    const { data, error } = await nhost.storage.upload(
+    const { fileMetadata, error } = await nhost.storage.upload(
       { file: new Blob([buffer]), name },
       { headers: ADMIN_HEADERS }
     )
 
-    if (error) return { error: 'storage upload failed' }
-    return { id: data.id, url: nhost.storage.getPublicUrl({ fileId: data.id }) }
+    if (error || !fileMetadata) return { error: 'storage upload failed' }
+    return { id: fileMetadata.id, url: nhost.storage.getPublicUrl({ fileId: fileMetadata.id }) }
   } catch (err) {
     return { error: err.message || 'download failed' }
   }
