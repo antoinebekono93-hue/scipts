@@ -100,7 +100,7 @@ const AdminProducts = ({ navigationItems, categories }) => {
       const formData = new FormData()
       formData.append('file', blob, `image.${blob.type === 'image/gif' ? 'gif' : 'webp'}`)
 
-      const res = await fetch('/api/admin/products?upload=true', {
+      const res = await fetch('/api/admin/upload', {
         method: 'POST',
         body: formData,
       })
