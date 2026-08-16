@@ -15,6 +15,7 @@ const Subscription = ({ navigationItems }) => {
   const { push } = useRouter()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
+  const [openFaq, setOpenFaq] = useState(0)
 
   useEffect(() => {
     if (cosmicUser?.id) {
@@ -102,6 +103,33 @@ const Subscription = ({ navigationItems }) => {
     return hasActiveSubscription && subscriptionPlan === planType
   }
 
+  const faqs = [
+    {
+      q: 'Comment fonctionne l\'abonnement ?',
+      a: 'L\'abonnement débloque tout le catalogue Premium : scripts PHP, plugins WordPress, templates HTML et applications web. Vous pouvez télécharger autant de produits que vous voulez pendant la durée de votre abonnement.',
+    },
+    {
+      q: 'Puis-je annuler mon abonnement à tout moment ?',
+      a: 'Oui. L\'abonnement est renouvelé automatiquement mais vous pouvez l\'annuler à tout moment depuis votre espace. Vous gardez l\'accès Premium jusqu\'à la fin de la période déjà payée.',
+    },
+    {
+      q: 'Que comprend le plan Gratuit ?',
+      a: 'Le plan Gratuit donne accès à toutes les applications gratuites du catalogue sans limite, avec les mises à jour standards et le support communautaire. Les produits Premium nécessitent un abonnement payant.',
+    },
+    {
+      q: 'Quels moyens de paiement sont acceptés ?',
+      a: 'Nous acceptons les cartes bancaires (Visa, Mastercard), le mobile money et l\'USSD via notre passerelle de paiement sécurisée Flutterwave.',
+    },
+    {
+      q: 'Que se passe-t-il si mon abonnement expire ?',
+      a: 'Vous perdez l\'accès aux téléchargements Premium mais conservez vos accès aux produits gratuits et votre historique. Les fichiers déjà téléchargés restent les vôtres.',
+    },
+    {
+      q: 'Les mises à jour sont-elles incluses ?',
+      a: 'Oui. Les mises à jour de tous les produits du catalogue sont incluses dans les abonnements payants pendant toute la durée de votre abonnement.',
+    },
+  ]
+
   const plans = [
     {
       name: 'Gratuit',
@@ -173,6 +201,33 @@ const Subscription = ({ navigationItems }) => {
                 </button>
               </div>
             ))}
+          </div>
+
+          <div className={styles.faq}>
+            <h2 className={styles.faqTitle}>Questions fréquentes</h2>
+            <div className={styles.faqList}>
+              {faqs.map((faq, index) => {
+                const open = openFaq === index
+                return (
+                  <div key={index} className={cn(styles.faqItem, { [styles.open]: open })}>
+                    <button
+                      className={styles.faqQuestion}
+                      onClick={() => setOpenFaq(open ? null : index)}
+                    >
+                      <span>{faq.q}</span>
+                      <span className={cn(styles.faqIcon, { [styles.open]: open })}>
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                          <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    </button>
+                    <div className={styles.faqAnswer}>
+                      <p>{faq.a}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>

@@ -92,3 +92,76 @@
   width: 100%
   height: 48px
   font-size: 16px
+
+.faq
+  margin-top: 96px
+  max-width: 800px
+  margin-left: auto
+  margin-right: auto
+
+.faqTitle
+  margin-bottom: 40px
+  font-size: 32px
+  line-height: 1.2
+  font-weight: 700
+  text-align: center
+
+.faqList
+  border-top: 1px solid $neutrals6
+  +dark
+    border-color: $neutrals3
+
+.faqItem
+  border-bottom: 1px solid $neutrals6
+  +dark
+    border-color: $neutrals3
+
+.faqQuestion
+  width: 100%
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 24px
+  padding: 24px 0
+  background: none
+  border: none
+  cursor: pointer
+  font-size: 18px
+  font-weight: 600
+  color: $neutrals2
+  text-align: left
+  +dm-sans
+  +dark
+    color: $neutrals8
+
+.faqIcon
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-shrink: 0
+  width: 32px
+  height: 32px
+  border-radius: 50%
+  border: 1px solid $neutrals6
+  color: $neutrals4
+  transition: transform .3s, border-color .3s, color .3s
+  +dark
+    border-color: $neutrals3
+
+  &.open
+    transform: rotate(180deg)
+    border-color: $blue
+    color: $blue
+
+.faqAnswer
+  max-height: 0
+  overflow: hidden
+  transition: max-height .3s
+  p
+    padding: 0 0 24px
+    font-size: 16px
+    line-height: 1.7
+    color: $neutrals4
+
+  .faqItem.open &
+    max-height: 240px
