@@ -25,8 +25,8 @@ function detectPlanType(amount, explicitPlanType) {
   if (explicitPlanType && ['quarterly', 'annual'].includes(explicitPlanType)) {
     return explicitPlanType
   }
-  if (amount >= 16) return 'annual'
-  if (amount >= 10) return 'quarterly'
+  if (amount >= 25) return 'annual'
+  if (amount >= 16) return 'quarterly'
   return 'free'
 }
 

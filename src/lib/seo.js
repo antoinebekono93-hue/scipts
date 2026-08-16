@@ -1,7 +1,7 @@
 export const SITE_URL = 'https://scipts.vercel.app'
 export const SITE_NAME = 'Script Marketplace'
 export const DEFAULT_DESCRIPTION =
-  'Téléchargez des scripts PHP, plugins WordPress, modules WHMCS et applications web premium. Des milliers de produits avec un abonnement simple : 10$/3 mois ou 16$/an.'
+  'Téléchargez des scripts PHP, plugins WordPress, modules WHMCS et applications web premium. Des milliers de produits avec un abonnement simple : 16$/3 mois ou 25$/an.'
 
 export function canonicalPath(path) {
   if (!path) return SITE_URL

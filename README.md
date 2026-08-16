@@ -5,7 +5,7 @@ Marketplace de scripts PHP, templates HTML, plugins WordPress, modules WHMCS et 
 ## Fonctionnalités
 
 - Catalogue de produits filtrable (recherche, couleur, prix, catégorie)
-- Abonnement 3 niveaux : Gratuit / Trimestriel 10$ / Annuel 16$ (Flutterwave)
+- Abonnement 3 niveaux : Gratuit / Trimestriel 16$ / Annuel 25$ (Flutterwave)
 - Téléchargements protégés : `/api/download/[slug]` vérifie le token + l'abonnement actif avant de servir le fichier (streaming, proxy des URLs)
 - Panier + checkout Stripe
 - Page produit avec galerie d'images

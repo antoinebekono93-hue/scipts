@@ -96,16 +96,16 @@ const Home = ({
                   onClick={() => push('/subscription')}
                 >
                   <span className="plan-name">Trimestriel</span>
-                  <span className="plan-price">10$</span>
+                  <span className="plan-price">16$</span>
                   <span className="plan-period">/ 3 mois</span>
                 </button>
                 <button 
                   className="premium-cta-btn annual"
                   onClick={() => push('/subscription')}
                 >
-                  <span className="plan-badge">-47%</span>
+                  <span className="plan-badge">-61%</span>
                   <span className="plan-name">Annuel</span>
-                  <span className="plan-price">16$</span>
+                  <span className="plan-price">25$</span>
                   <span className="plan-period">/ an</span>
                 </button>
               </div>

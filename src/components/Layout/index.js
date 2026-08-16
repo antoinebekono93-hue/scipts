@@ -33,7 +33,7 @@ const Layout = ({ children, title, navigationPaths }) => {
       <PageMeta
         title={'Script Marketplace — Scripts PHP, plugins WordPress, WHMCS et applications premium'}
         description={
-          'Téléchargez des scripts PHP, plugins WordPress, modules WHMCS et applications web premium avec un abonnement simple : 10$/3 mois ou 16$/an.'
+          'Téléchargez des scripts PHP, plugins WordPress, modules WHMCS et applications web premium avec un abonnement simple : 16$/3 mois ou 25$/an.'
         }
         path="/"
       />

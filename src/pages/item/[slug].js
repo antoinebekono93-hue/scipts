@@ -302,7 +302,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                     className={cn('button', styles.button)}
                     onClick={() => push('/subscription')}
                   >
-                    Débloquer Premium (10$/3 mois ou 16$/an)
+                    Débloquer Premium (16$/3 mois ou 25$/an)
                   </button>
                 )}
                 {itemInfo[0]?.metadata?.demo_url && (

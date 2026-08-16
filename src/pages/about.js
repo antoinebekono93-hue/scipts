@@ -24,7 +24,7 @@ const AboutUs = ({ navigationItems, landing }) => {
       <PageMeta
         title="À propos — Script Marketplace | Scripts PHP, WordPress et WHMCS"
         description={
-          'Script Marketplace est une plateforme de scripts PHP, plugins WordPress, modules WHMCS et applications web premium. Accédez à tout le catalogue avec un abonnement simple : 10$/3 mois ou 16$/an.'
+          'Script Marketplace est une plateforme de scripts PHP, plugins WordPress, modules WHMCS et applications web premium. Accédez à tout le catalogue avec un abonnement simple : 16$/3 mois ou 25$/an.'
         }
         path="/about"
       />
