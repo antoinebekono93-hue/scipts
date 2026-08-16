@@ -22,7 +22,7 @@ export async function getAllDataByType(dataType = 'categories') {
         metadata: {
           title: 'Découvrez nos nouveautés',
           subtitle: 'Une plateforme innovante',
-          description: 'Abonnement dès 15$/mois',
+          description: 'Abonnement dès 16$/3 mois ou 25$/an',
           image: { imgix_url: '/images/content/hero.png' }
         }
       },

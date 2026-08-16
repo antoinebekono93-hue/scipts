@@ -82,25 +82,27 @@ const Home = ({
       <Selection info={categoriesGroup['groups']} type={categoryTypes} />
       <Intro info={chooseBySlug(landing, 'introduction')} />
       {showPremiumCTA && (
-        <section className="premium-cta-section">
+        <section className="premium-cta-section" aria-label="Offre Premium">
           <div className="container">
             <div className="premium-cta-card">
-              <div className="premium-cta-icon">★</div>
+              <div className="premium-cta-icon" aria-hidden="true">★</div>
               <h2 className="premium-cta-title">Débloquez TOUT le catalogue Premium</h2>
               <p className="premium-cta-desc">
-                Accédez à des milliers de scripts PHP, plugins WordPress, templates HTML et applications exclusives.
+                Accédez à des milliers de scripts PHP, plugins WordPress, templates HTML et applications exclusives. Un seul abonnement, tous les téléchargements illimités.
               </p>
               <div className="premium-cta-plans">
-                <button 
+                <button
                   className="premium-cta-btn quarterly"
+                  aria-label="S'abonner au plan Trimestriel à 16$ pour 3 mois"
                   onClick={() => push('/subscription')}
                 >
                   <span className="plan-name">Trimestriel</span>
                   <span className="plan-price">16$</span>
                   <span className="plan-period">/ 3 mois</span>
                 </button>
-                <button 
+                <button
                   className="premium-cta-btn annual"
+                  aria-label="S'abonner au plan Annuel à 25$ par an, économisez 61%"
                   onClick={() => push('/subscription')}
                 >
                   <span className="plan-badge">-61%</span>
@@ -109,7 +111,7 @@ const Home = ({
                   <span className="plan-period">/ an</span>
                 </button>
               </div>
-              <p className="premium-cta-note">Renouvellement automatique • Annulable à tout moment</p>
+              <p className="premium-cta-note">Renouvellement automatique • Annulable à tout moment • Paiement sécurisé Flutterwave</p>
             </div>
           </div>
         </section>

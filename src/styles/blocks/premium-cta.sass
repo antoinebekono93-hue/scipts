@@ -1,3 +1,5 @@
+@import ../helpers
+
 .premium-cta-section
     padding: 60px 0
     background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%)
@@ -68,10 +70,13 @@
     transition: all 0.3s ease
     min-width: 180px
 
+    &:focus
+        outline: none
+
     &.quarterly
         background: linear-gradient(135deg, #374151 0%, #1f2937 100%)
         border: 1px solid rgba(255, 255, 255, 0.1)
-        
+
         &:hover
             background: linear-gradient(135deg, #4b5563 0%, #374151 100%)
             transform: translateY(-2px)
@@ -79,7 +84,7 @@
 
     &.annual
         background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%)
-        
+
         &:hover
             background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)
             transform: translateY(-2px)
@@ -118,3 +123,18 @@
     font-size: 13px
     color: rgba(255, 255, 255, 0.5)
     margin-top: 8px
+
++m
+    .premium-cta-section
+        margin: 24px 0
+        padding: 40px 0
+
+    .premium-cta-card
+        padding: 32px 24px
+
+    .premium-cta-title
+        font-size: 24px
+
+    .premium-cta-btn
+        width: 100%
+        min-width: 0
