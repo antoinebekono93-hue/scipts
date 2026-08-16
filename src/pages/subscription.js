@@ -115,7 +115,7 @@ const Subscription = ({ navigationItems }) => {
     {
       name: 'Annuel',
       type: 'annual',
-      price: 16,
+      price: 25,
       period: 'Facturé par an (25$) - Économisez 61% - Renouvellement auto',
       features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique', 'Meilleur rapport qualité/prix'],
       btnText: "S'abonner 25$ / an",
@@ -125,7 +125,7 @@ const Subscription = ({ navigationItems }) => {
     {
       name: 'Trimestriel',
       type: 'quarterly',
-      price: 10,
+      price: 16,
       period: 'Facturé tous les 3 mois (16$) - Renouvellement auto',
       features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique'],
       btnText: "S'abonner 16$ / 3 mois",
