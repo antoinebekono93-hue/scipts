@@ -113,16 +113,6 @@ const Subscription = ({ navigationItems }) => {
       current: !hasActiveSubscription
     },
     {
-      name: 'Trimestriel',
-      type: 'quarterly',
-      price: 10,
-      period: 'Facturé tous les 3 mois (10$) - Renouvellement auto',
-      features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique'],
-      btnText: "S'abonner 10$ / 3 mois",
-      popular: false,
-      current: isCurrentPlan('quarterly')
-    },
-    {
       name: 'Annuel',
       type: 'annual',
       price: 16,
@@ -131,6 +121,16 @@ const Subscription = ({ navigationItems }) => {
       btnText: "S'abonner 16$ / an",
       popular: true,
       current: isCurrentPlan('annual')
+    },
+    {
+      name: 'Trimestriel',
+      type: 'quarterly',
+      price: 10,
+      period: 'Facturé tous les 3 mois (10$) - Renouvellement auto',
+      features: ['TOUT le catalogue Premium', 'Scripts & Plugins Pro', 'Mises à jour incluses', 'Support prioritaire', 'Renouvellement automatique'],
+      btnText: "S'abonner 10$ / 3 mois",
+      popular: false,
+      current: isCurrentPlan('quarterly')
     }
   ]
 
