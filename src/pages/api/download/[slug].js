@@ -148,7 +148,7 @@ export default async function handler(req, res) {
   }
 
   const fileUrl = product.file_url
-  const fileId = getFileIdFromUrl(fileUrl) || product.image_id
+  const fileId = getFileIdFromUrl(fileUrl)
 
   if (fileId) {
     const publicUrl = nhost.storage.getPublicUrl({ fileId })
@@ -160,7 +160,6 @@ export default async function handler(req, res) {
   }
 
   if (fileUrl) {
-    // Lien externe (fichier hébergé ailleurs) : on renvoie l'URL pour ouverture directe
     return res.status(200).json({ externalUrl: fileUrl })
   }
 
