@@ -121,6 +121,12 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
 
   const handleDownload = async () => {
     try {
+      const fileUrl = itemInfo[0]?.metadata?.file_url
+      if (fileUrl) {
+        window.open(fileUrl, '_blank')
+        return
+      }
+
       const token = nhost.auth.getAccessToken()
       const res = await fetch(`/api/download/${itemInfo[0]?.slug}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -137,17 +143,6 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
         return
       }
       if (!res.ok) {
-        toast.error('Erreur de téléchargement')
-        return
-      }
-
-      const contentType = res.headers.get('content-type') || ''
-      if (contentType.includes('application/json')) {
-        const data = await res.json()
-        if (data?.externalUrl) {
-          window.open(data.externalUrl, '_blank')
-          return
-        }
         toast.error('Erreur de téléchargement')
         return
       }
