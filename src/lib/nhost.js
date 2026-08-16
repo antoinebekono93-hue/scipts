@@ -39,15 +39,6 @@ export async function getAllDataByType(dataType = 'categories') {
     ]
   }
 
-  if (dataType === 'reviews') {
-    return [
-      {
-        title: 'Review 1',
-        metadata: { author: 'Alice', text: 'Incroyable marketplace !', image: '/images/content/avatar.png' }
-      }
-    ]
-  }
-
   if (dataType === 'navigation') {
     // On force le menu mocké car la table Nhost est incomplète
     return [

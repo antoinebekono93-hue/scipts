@@ -5,7 +5,6 @@ import Layout from '../components/Layout'
 import {
   Intro,
   Selection,
-  Partners,
   HotBid,
   Categories,
   Discover,
@@ -19,7 +18,6 @@ import { PageMeta, JsonLd } from '../components/Meta'
 import { buildItemListJsonLd, DEFAULT_DESCRIPTION } from '../lib/seo'
 
 const Home = ({
-  reviews,
   landing,
   categoriesGroup,
   categoryTypes,
@@ -116,7 +114,6 @@ const Home = ({
           </div>
         </section>
       )}
-      <Partners info={reviews} />
       <Discover
         info={categoriesGroup['groups']}
         type={categoriesGroup['type']}
@@ -128,7 +125,6 @@ const Home = ({
 export default Home
 
 export async function getServerSideProps() {
-  const reviews = (await getAllDataByType('reviews')) || []
   const landing = (await getAllDataByType('landings')) || []
   const categoryTypes = (await getAllDataByType('categories')) || []
   const categoriesData = await Promise.all(
@@ -150,7 +146,6 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      reviews,
       landing,
       categoriesGroup,
       categoryTypes,
