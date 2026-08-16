@@ -215,7 +215,7 @@ const Item = ({ itemInfo, categoriesGroup, navigationItems }) => {
                         size={{ width: '100%', height: '100%' }}
                         src={img.url}
                         alt={`Image ${index + 1}`}
-                        objectFit="cover"
+                  objectFit="contain"
                       />
                     </button>
                   ))}
