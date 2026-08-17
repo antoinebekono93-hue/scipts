@@ -33,10 +33,12 @@ export const StateContext = ({ children }) => {
     if (isLoading) return
 
     if (isAuthenticated && nhostUser?.id) {
+      const rawName = nhostUser.displayName || ''
+      const isEmail = rawName.includes('@')
       const mappedUser = {
         id: nhostUser.id,
         first_name:
-          nhostUser.displayName || nhostUser.email?.split('@')[0] || 'User',
+          (!isEmail && rawName) || nhostUser.email?.split('@')[0] || 'User',
         avatar_url: nhostUser.avatarUrl || null,
         email: nhostUser.email || '',
       }

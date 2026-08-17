@@ -65,9 +65,11 @@ const OAuth = ({ className, handleClose, handleOAuth, disable, redirectToSubscri
 
         if (res.session?.user) {
           const user = res.session.user
+          const rawName = user.displayName || ''
+          const isEmailName = rawName.includes('@')
           const mappedUser = {
             id: user.id,
-            first_name: user.displayName || email.split('@')[0],
+            first_name: (!isEmailName && rawName) || email.split('@')[0],
             avatar_url: user.avatarUrl,
           }
           setCosmicUser(mappedUser)
